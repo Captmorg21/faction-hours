@@ -1,0 +1,2972 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wanderer's Refuge | Faction Hours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1A1F;
+    --panel:#142A31;
+    --panel-2:#183239;
+    --line:#23434C;
+    --text:#DCE8EA;
+    --dim:#7C9AA1;
+    --brass:#C9A227;
+    --rose:#E8556D;
+    --ok:#5FA97F;
+    --sky:#5B9BC4;
+    --cold:#2B5F6E;
+    --empty:#14262C;
+    --sans:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cond:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  /* our own display rules outrank the browser's [hidden] handling,
+     so state it explicitly or hidden elements stay on screen */
+  [hidden]{display:none!important}
+  html,body{margin:0;background:var(--ink);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.5}
+  body{padding:0 0 64px}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+
+  /* clock strip */
+  .clock{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#122229,#0E1A1F);}
+  .clock .wrap{padding-top:18px;padding-bottom:18px}
+  .masthead{font-family:var(--cond);font-size:clamp(21px,4.5vw,27px);font-weight:600;color:#fff;
+            letter-spacing:.01em;line-height:1.1;margin-bottom:14px}
+  .masthead span{display:block;font-size:13px;font-family:var(--sans);font-weight:400;
+                 color:var(--dim);letter-spacing:0;margin-top:2px}
+  .clockrow{display:flex;align-items:baseline;gap:10px 18px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+  .brand .masthead{margin-bottom:0}
+  .banner{height:76px;width:auto;max-width:42vw;display:block;border-radius:3px;
+          border:1px solid var(--line);object-fit:contain}
+  @media (max-width:600px){.banner{height:54px}}
+  .tct{font-family:var(--cond);font-weight:600;font-size:clamp(28px,5.5vw,40px);line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums;color:#fff}
+  .tct-label{font-family:var(--cond);font-size:16px;color:var(--brass);letter-spacing:.06em}
+  .yours{color:var(--dim);font-size:14px;font-variant-numeric:tabular-nums}
+  .yours b{color:var(--text);font-weight:500}
+  .whoami{font-size:13px;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .whoami button{padding:3px 8px;font-size:12px}
+
+  /* tabs */
+  .tabs{display:flex;gap:2px;margin:24px 0 0}
+  .tab{font-family:var(--cond);font-size:20px;letter-spacing:.02em;background:none;border:1px solid var(--line);border-bottom:none;color:var(--dim);
+       padding:8px 20px 7px;cursor:pointer;border-radius:3px 3px 0 0}
+  .tab[aria-selected="true"]{background:var(--panel);color:var(--text);box-shadow:inset 0 2px 0 var(--brass)}
+  .tab[data-locked]{opacity:.5;cursor:not-allowed}
+  .tab[data-locked]::after{content:" \1F512";font-size:11px}
+  .locked-note{background:var(--panel-2);border-left:3px solid var(--brass);border-radius:3px;
+               padding:16px 18px;margin-bottom:4px}
+  .locked-note h2{margin-bottom:6px}
+  .locked-note p{margin:0;color:var(--dim);font-size:15px;max-width:60ch}
+  .tab:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .pane{background:var(--panel);border:1px solid var(--line);border-radius:0 3px 3px 3px;padding:22px}
+  /* Six folder tabs never fit a phone. Below this width they become a wrapped
+     button group instead of running off the edge. */
+  @media (max-width:760px){
+    .tabs{flex-wrap:wrap;gap:4px;margin-bottom:6px}
+    .tab{flex:1 1 auto;min-width:31%;border-radius:3px;border-bottom:1px solid var(--line);
+         padding:9px 6px 8px;font-size:17px;text-align:center}
+    .tab[aria-selected="true"]{border-color:var(--brass)}
+    .pane{border-radius:3px;padding:18px 14px}
+  }
+
+  h2{font-family:var(--cond);font-weight:600;font-size:23px;margin:0 0 4px;letter-spacing:.01em}
+  p.hint{color:var(--dim);font-size:14px;margin:0 0 18px;max-width:62ch}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+  label{display:block;font-size:13px;color:var(--dim);margin-bottom:4px}
+  .tag{font-size:10px;letter-spacing:.04em;padding:1px 5px;border-radius:2px;margin-left:4px;vertical-align:1px}
+  .tag.req{background:var(--brass);color:#20180A;font-weight:600}
+  .tag.opt{border:1px solid var(--line);color:var(--dim)}
+  .loginbar{background:var(--panel-2);border:1px solid var(--sky);border-radius:3px;
+            padding:14px 18px;margin-top:22px}
+  .loginbar .lb-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  .loginbar .lb-field{flex:0 1 260px;min-width:0}
+  .loginbar .lb-field input{width:100%}
+  .loginbar .lb-alt{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .loginbar .lb-msg:empty{display:none}
+  .loginbar .lb-msg{margin:10px 0 0;font-size:14px}
+  .loginbar #lb-help{margin:10px 0 0}
+  .loginbar a{color:var(--brass)}
+  .nfl-head{display:flex;align-items:center;gap:12px}
+  .nfl-head h2{margin:0}
+  .nfl-head button{margin-left:auto}
+  .nfl-h3{font-family:var(--cond);font-size:21px;font-weight:600;margin:24px 0 10px}
+  .you-card{border-radius:3px;padding:16px 18px;margin:18px 0;border-left:3px solid var(--line);background:var(--panel-2)}
+  .you-card.lost{border-left-color:var(--rose);background:rgba(232,85,109,.1)}
+  .you-card.won{border-left-color:var(--ok);background:rgba(95,169,127,.1)}
+  .you-card h3{font-family:var(--cond);font-size:24px;margin:0 0 4px}
+  .you-card .sub{color:var(--dim);font-size:14px}
+  .you-card .big{font-family:var(--cond);font-size:34px;color:#fff;line-height:1.1;margin:8px 0 2px}
+  .hitrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .hitrow button{width:38px;height:38px;padding:0;border-radius:3px;font-size:15px}
+  .hitrow button.done{background:var(--ok);border-color:var(--ok);color:#06210f;font-weight:600}
+  .slap{background:rgba(201,162,39,.09);border:1px solid rgba(201,162,39,.5);border-radius:3px;
+        padding:10px 14px;margin-bottom:6px}
+  .slapline{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-size:15px}
+  .slapline .wn{color:var(--ok);font-weight:500}
+  .slapline .ln{color:var(--rose);font-weight:500}
+  .slapline .sc{font-family:var(--cond);font-size:19px;color:#fff;font-variant-numeric:tabular-nums}
+  .slapline .sc.pending{color:var(--dim);font-size:15px}
+  .slapwhen{font-size:12px;color:var(--dim);margin-top:3px}
+  .slapmark{margin-top:7px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .slapped{color:var(--ok);font-size:13px;font-weight:500}
+  .nfl-table{width:100%;border-collapse:collapse;font-size:14px}
+  .nfl-table th{text-align:left;font-size:11px;letter-spacing:.04em;color:var(--dim);
+                font-weight:500;padding:0 8px 6px 0;text-transform:uppercase}
+  .nfl-table td{padding:7px 8px 7px 0;border-top:1px solid var(--line);vertical-align:top}
+  .nfl-table tr.lost td{background:rgba(232,85,109,.07)}
+  .nfl-table .tm{font-family:var(--cond);font-size:16px;width:52px}
+  .nfl-table .res{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .nfl-table .owe{color:var(--rose);font-weight:600;white-space:nowrap}
+  .nfl-table .safe{color:var(--ok)}
+  .nfl-table .pend{color:var(--dim)}
+  .nfl-table .empty{color:var(--dim)}
+  .nfl-table tr.head{cursor:pointer}
+  .nfl-table tr.head:hover td{background:rgba(255,255,255,.04)}
+  .nfl-table .tmfull{font-family:var(--cond);font-size:16px;white-space:nowrap}
+  /* Logos and text share a baseline-free centre line, so nothing sits high or
+     low next to a badge. */
+  .tmcell{display:inline-flex;align-items:center;gap:8px;line-height:1.2;vertical-align:middle}
+  .nfl-table .tmcell{display:flex}
+  .tlogo{width:24px;height:24px;object-fit:contain;flex:none;display:block}
+  .tlogo.sm{width:18px;height:18px}
+  .tlogo.big{width:32px;height:32px}
+  /* give the coloured team stripe room so badges don't sit on top of it */
+  .nfl-table td:first-child,.nfl-table th:first-child{padding-left:12px}
+  .nfl-table tr.head td{vertical-align:middle}
+  .you-card h3.tmcell{flex-wrap:wrap;gap:10px;align-items:center}
+  .you-card .vs{color:var(--dim);font-size:19px;font-weight:400}
+
+  /* On a phone a six column table is about 540px of content in a 380px space.
+     Rather than scroll sideways, each row becomes a small card with its column
+     name printed beside the value. */
+  @media (max-width:640px){
+    .nfl-table thead{display:none}
+    .nfl-table,.nfl-table tbody,.nfl-table tr,.nfl-table td{display:block;width:100%}
+    .nfl-table tr{background:var(--panel-2);border-radius:3px;padding:10px 12px 8px;
+                  margin-bottom:6px;overflow:hidden}
+    .nfl-table tr.lost{background:rgba(232,85,109,.1)}
+    .nfl-table td{border:none;padding:3px 0;display:flex;align-items:center;gap:10px}
+    .nfl-table td:first-child,.nfl-table th:first-child{padding-left:0}
+    .nfl-table td[data-l]::before{content:attr(data-l);color:var(--dim);font-size:11px;
+      letter-spacing:.04em;text-transform:uppercase;min-width:74px;flex:none}
+    .nfl-table td.detail{padding:8px 0 0}
+    .nfl-table td.detail::before{content:none}
+    .nfl-detail{grid-template-columns:1fr}
+    .nfl-table .tm,.nfl-table .tmfull{font-size:15px}
+    .nfl-table .cov,.nfl-table .away{margin-left:0}
+  }
+  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--rose);
+            margin-right:6px;animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .nfl-table .livecell{color:var(--rose);font-weight:600;white-space:nowrap}
+  .oddsline{font-size:12px;color:var(--dim);margin-top:2px}
+  .gclink{color:var(--brass);font-size:12px}
+  .qtrs{font-variant-numeric:tabular-nums;font-size:12px;color:var(--dim)}
+  .recap{font-size:13px;color:var(--text);margin-top:8px;font-style:italic}
+  @media (prefers-reduced-motion:reduce){.live-dot{animation:none}}
+  .nfl-table .abbr{color:var(--dim);font-size:11px;margin-left:5px;font-family:var(--sans)}
+  .nfl-table td.detail{padding:0 8px 12px 0}
+  .nfl-detail{background:var(--panel-2);border-left:3px solid var(--brass);border-radius:2px;
+              padding:11px 14px;font-size:13px;display:grid;gap:5px;
+              grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .nfl-detail b{color:var(--text);font-weight:500}
+  .nfl-detail span{color:var(--dim)}
+  .season-table td.def{color:var(--rose);font-weight:600}
+  .season-table td.clean{color:var(--ok)}
+  .forfeit{background:rgba(232,85,109,.11);border:1px solid var(--rose);border-radius:3px;
+           padding:12px 15px;margin:18px 0}
+  .forfeit h3{font-family:var(--cond);font-size:20px;margin:0 0 6px;color:var(--rose)}
+  .forfeit ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:3px}
+  .forfeit li{font-size:14px}
+  .forfeit .short{color:var(--rose);font-weight:600}
+  .rank{font-family:var(--cond);font-size:17px;color:var(--dim);width:34px}
+  .rank.first{color:var(--brass)}
+  .betline{margin-top:10px;font-size:13px;color:var(--dim)}
+  .betline a{color:var(--brass)}
+  .paid{color:var(--ok);font-weight:600}
+  .unpaid{color:var(--rose);font-weight:600}
+  .histsum{color:var(--dim);font-size:13px;margin-bottom:8px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{font-size:13px;padding:5px 12px;border-radius:14px;background:var(--panel-2);
+        border:1px solid var(--line);color:var(--dim);cursor:pointer}
+  .chip.on{background:var(--brass);border-color:var(--brass);color:#20180A;font-weight:600}
+  .cal-head{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+  .cal-month{font-family:var(--cond);font-size:23px;min-width:190px;text-align:center}
+  .cal-dow,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cal-dow span{font-size:11px;color:var(--dim);text-align:center;padding-bottom:4px}
+  .cal-cell{min-height:80px;background:var(--panel-2);border-radius:2px;padding:5px 6px;
+            cursor:pointer;border:1px solid transparent;overflow:hidden}
+  .cal-cell:hover{border-color:var(--line)}
+  .cal-cell.out{opacity:.3}
+  .cal-cell.today .dnum{color:var(--brass);font-weight:600}
+  .cal-cell.sel{border-color:#fff}
+  .cal-cell .dnum{font-size:12px;font-variant-numeric:tabular-nums;color:var(--dim)}
+  .cal-chip{font-size:11px;line-height:1.4;padding:1px 5px;border-radius:2px;margin-top:2px;
+            display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+            color:var(--text);border-left:3px solid transparent}
+  .cal-chip.war{background:rgba(232,85,109,.16);border-left-color:var(--rose)}
+  .cal-chip.chain{background:rgba(91,155,196,.16);border-left-color:var(--sky)}
+  .cal-chip.event{background:rgba(201,162,39,.16);border-left-color:var(--brass)}
+  .cal-chip.note{background:rgba(124,154,161,.13);border-left-color:var(--dim)}
+  /* days in the middle of a run get a quiet bar, not the title over and over */
+  .cal-chip.cont{height:7px;padding:0;border-left-width:0;border-radius:0;opacity:.55}
+  .cal-chip.done{opacity:.4}
+  .cal-more{font-size:10px;color:var(--dim);margin-top:2px}
+  .day-detail{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .day-detail h3{font-family:var(--cond);font-size:21px;margin:0 0 4px}
+  @media (max-width:640px){
+    .cal-cell{min-height:52px;padding:3px}
+    .cal-chip{text-indent:-9999px;padding:0;width:7px;height:7px;border-radius:50%;
+              display:inline-block;margin:2px 2px 0 0}
+    .cal-more{display:none}
+    .cal-month{min-width:0;flex:1;font-size:19px}
+  }
+  .cal{list-style:none;margin:0;padding:0}
+  .cal li{border-bottom:1px solid var(--line);padding:13px 0}
+  .cal li:last-child{border-bottom:none}
+  .cal .top{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .cal .ttl{font-family:var(--cond);font-size:20px}
+  .cal .kind{font-size:10px;letter-spacing:.05em;padding:2px 7px;border-radius:2px;text-transform:uppercase}
+  .kind.war{background:var(--rose);color:#2a0a10;font-weight:600}
+  .kind.chain{background:var(--sky);color:#08202e;font-weight:600}
+  .kind.event{background:var(--brass);color:#20180A;font-weight:600}
+  .kind.note{background:var(--line);color:var(--text)}
+  .cal .src{font-size:10px;border:1px solid var(--line);color:var(--dim);padding:1px 6px;border-radius:2px}
+  .cal .cov{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--brass);font-size:14px}
+  .cal .when{color:var(--dim);font-size:13px;margin-top:3px;font-variant-numeric:tabular-nums}
+  .cal .note{margin:7px 0 0;font-size:14px;color:var(--text);max-width:70ch;white-space:pre-wrap}
+  .cal .acts{margin-top:7px;display:flex;gap:6px}
+  .rsvp{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .rsvp-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .rsvp-sum{font-size:13px;color:var(--dim)}
+  .rsvp-btns{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .rsvp-btns button{padding:5px 14px;font-size:13px;border-radius:14px}
+  .rsvp-btns button.on.in{background:var(--ok);border-color:var(--ok);color:#06210f;font-weight:600}
+  .rsvp-btns button.on.maybe{background:var(--brass);border-color:var(--brass);color:#20180A;font-weight:600}
+  .rsvp-btns button.on.out{background:var(--rose);border-color:var(--rose);color:#2a0a10;font-weight:600}
+  .rsvp-groups{margin-top:9px;display:flex;flex-direction:column;gap:3px}
+  .rsvp-row{display:flex;align-items:baseline;gap:8px;font-size:13px;line-height:1.45}
+  .rsvp-row .pip{width:6px;height:6px;border-radius:50%;flex:none;position:relative;top:-1px}
+  .pip.in{background:var(--ok)}.pip.maybe{background:var(--brass)}.pip.out{background:var(--rose)}
+  .rsvp-row .rlab{color:var(--dim);flex:none;min-width:74px}
+  .rsvp-row .rnames{color:var(--text)}
+  @media (max-width:600px){.rsvp-btns{margin-left:0;width:100%}.rsvp-btns button{flex:1}}
+  .chain-live{background:rgba(232,85,109,.12);border:1px solid var(--rose);border-radius:3px;
+              padding:14px 18px;margin-bottom:22px}
+  .chain-live .n{font-family:var(--cond);font-size:38px;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+  .chain-live .l{font-size:13px;color:var(--dim)}
+  .chain-live .t{color:var(--rose);font-family:var(--cond);font-size:22px;font-variant-numeric:tabular-nums}
+  .doc h1,.doc h2,.doc h3{font-family:var(--cond);color:var(--brass);margin:20px 0 8px}
+  .doc h1{font-size:26px}.doc h2{font-size:22px}.doc h3{font-size:19px}
+  .doc p{margin:0 0 12px;max-width:72ch}
+  .doc ul{margin:0 0 14px;padding-left:22px;max-width:72ch}
+  .doc li{margin-bottom:5px}
+  .doc code{background:var(--ink);border:1px solid var(--line);padding:1px 5px;border-radius:2px;font-size:13px}
+  .doc-meta{color:var(--dim);font-size:12px;margin-top:20px;border-top:1px solid var(--line);padding-top:10px}
+  .demo-banner{background:rgba(91,155,196,.13);border:1px solid var(--sky);border-radius:3px;
+               padding:12px 16px;margin-top:22px;font-size:14px;color:var(--text);line-height:1.5}
+  .demo-banner strong{color:var(--sky)}
+  .signin{background:var(--panel-2);border-left:3px solid var(--sky);border-radius:3px;
+          padding:14px 18px;margin:0 0 24px}
+  .signin h3{font-family:var(--cond);font-size:20px;font-weight:600;margin:0 0 4px;color:var(--sky)}
+  .signin p{margin:0 0 12px;color:var(--dim);font-size:14px;max-width:64ch}
+  .signin .row{margin-bottom:0}
+  .steps{margin:12px 0 0;padding-left:20px;max-width:62ch}
+  .steps li{color:var(--text);font-size:14px;margin-bottom:7px;line-height:1.5}
+  .steps li:last-child{margin-bottom:0}
+  .steps code{background:var(--ink);border:1px solid var(--line);border-radius:2px;
+              padding:1px 5px;font-size:13px}
+  a.ext{color:var(--brass)}
+  input,select,textarea,button{font-family:var(--sans);font-size:15px}
+  input,select,textarea{background:var(--ink);border:1px solid var(--line);color:var(--text);padding:8px 10px;border-radius:3px}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+  textarea{width:100%;min-height:70px;resize:vertical;font-size:13px;word-break:break-all}
+  button{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:3px;cursor:pointer}
+  button:hover{border-color:var(--brass);color:#fff}
+  button.primary{background:var(--brass);border-color:var(--brass);color:#20180A;font-weight:600}
+  button.primary:hover{background:#dab52f;color:#20180A}
+  button.quiet{background:none;color:var(--dim);border-color:transparent;padding:6px 8px}
+  button.quiet:hover{color:var(--rose)}
+
+  /* grids */
+  /* range editor (mobile entry) */
+  /* events */
+  .ev-hero{background:var(--panel-2);border-left:3px solid var(--brass);border-radius:3px;padding:18px 20px}
+  .ev-hero .when{font-size:13px;color:var(--brass);letter-spacing:.03em;margin-bottom:2px}
+  .ev-hero h2{font-size:29px;margin:0 0 10px}
+  .ev-clock{font-family:var(--cond);font-size:clamp(30px,7vw,46px);line-height:1;color:#fff;
+            font-variant-numeric:tabular-nums;margin-bottom:12px}
+  .ev-clock small{font-size:15px;color:var(--dim);font-family:var(--sans);margin-left:3px;margin-right:10px}
+  .ev-hero p{margin:0;max-width:66ch;font-size:15px}
+  .ev-live{color:var(--ok);font-family:var(--cond);font-size:26px}
+  .evlist{list-style:none;margin:0;padding:0}
+  .evlist li{display:flex;align-items:baseline;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .evlist li:last-child{border-bottom:none}
+  .evlist .nm{font-family:var(--cond);font-size:19px;min-width:190px}
+  .evlist .dt{color:var(--dim);font-size:14px}
+  .evlist .away{margin-left:auto;color:var(--brass);font-variant-numeric:tabular-nums;font-size:14px}
+  .evlist li.head{cursor:pointer}
+  .evlist li.head:hover .nm{color:var(--brass)}
+  .evlist li.head .caret{color:var(--dim);font-size:11px;width:12px}
+  .evlist .body{display:block;padding:0 0 14px 26px;max-width:66ch;color:var(--dim);font-size:14px;
+                border-bottom:1px solid var(--line);margin-top:-1px}
+  .evlist .body p{margin:0}
+  .approx{font-size:10px;border:1px solid var(--line);color:var(--dim);padding:1px 5px;border-radius:2px;margin-left:6px}
+  /* who's around */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:22px}
+  .tile{background:var(--panel-2);border-radius:3px;padding:12px 14px;border-left:3px solid var(--line)}
+  .tile .n{font-family:var(--cond);font-size:30px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+  .tile .l{font-size:12px;color:var(--dim);margin-top:3px}
+  .tile.ok{border-left-color:var(--ok)}
+  .tile.hosp{border-left-color:var(--rose)}
+  .tile.trav{border-left-color:var(--sky)}
+  .group{margin-bottom:20px}
+  .group h3{font-family:var(--cond);font-size:19px;font-weight:600;margin:0 0 8px}
+  .people{list-style:none;margin:0;padding:0;display:grid;gap:1px;
+          grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .people li{display:flex;align-items:baseline;gap:9px;background:rgba(255,255,255,.04);
+             padding:8px 11px;border-radius:2px;font-size:14px}
+  .people .dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--dim)}
+  .people .dot.on{background:var(--ok)}
+  .people .dot.idle{background:var(--brass)}
+  .people .meta{margin-left:auto;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
+  .people li.dim{color:var(--dim)}
+  .people .where{color:var(--sky)}
+  .people .timer{color:var(--rose);font-variant-numeric:tabular-nums}
+  .why{border-left:3px solid var(--brass);padding:2px 0 2px 18px;margin:0 0 26px}
+  .why h2{margin-bottom:10px;color:var(--brass)}
+  .why p{margin:0 0 12px;max-width:66ch;color:var(--text);font-size:15px}
+  .why p:last-child{margin-bottom:0;color:var(--dim)}
+  .why h3{font-family:var(--cond);font-size:21px;font-weight:600;margin:20px 0 10px;color:var(--brass)}
+  .why-body{position:relative;overflow:hidden;max-height:4.6em;transition:max-height .32s ease}
+  .why-body::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.6em;pointer-events:none;
+                   background:linear-gradient(to bottom,rgba(20,42,49,0),var(--panel));transition:opacity .2s}
+  .why-body.open{max-height:60em}
+  .why-body.open::after{opacity:0}
+  .why-toggle{margin-top:10px;background:none;border:none;padding:4px 0;color:var(--brass);
+              font-size:14px;cursor:pointer}
+  .why-toggle:hover{color:#dab52f;text-decoration:underline}
+  @media (prefers-reduced-motion:reduce){.why-body{transition:none}}
+  #range-wrap{margin-bottom:20px}
+  .rrow{background:var(--panel-2);border-radius:3px;padding:12px;margin-bottom:10px;position:relative}
+  .rtimes{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .rtimes .arrow{color:var(--dim);flex:none;padding-top:11px}
+  .hp{flex:1;min-width:0;position:relative}
+  .hp-btn{width:100%;font-size:18px;padding:9px 8px;text-align:left;background:var(--ink);
+          border:1px solid var(--line);border-radius:3px;font-variant-numeric:tabular-nums}
+  .hp-btn[aria-expanded="true"]{border-color:var(--brass);color:#fff}
+  .hp-btn .caret{float:right;color:var(--dim);font-size:12px;line-height:26px}
+  .hp-list{margin-top:4px;max-height:184px;overflow-y:auto;background:var(--ink);
+           border:1px solid var(--brass);border-radius:3px;scroll-snap-type:y proximity;
+           overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .hp-opt{display:block;width:100%;text-align:left;background:none;border:none;border-radius:0;
+          padding:11px 12px;font-size:17px;color:var(--text);scroll-snap-align:center;
+          font-variant-numeric:tabular-nums}
+  .hp-opt:hover{background:rgba(201,162,39,.14);color:#fff}
+  .hp-opt.sel{background:var(--brass);color:#20180A;font-weight:600}
+  .rdays{display:flex;gap:4px}
+  .rdays button{flex:1;padding:9px 0;font-size:13px;border-radius:3px;background:var(--ink);
+                border:1px solid var(--line);color:var(--dim);min-width:0}
+  .rdays button.on{background:var(--brass);border-color:var(--brass);color:#20180A;font-weight:600}
+  .rdel{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--dim);
+        font-size:20px;line-height:1;padding:2px 8px;cursor:pointer}
+  .rdel:hover{color:var(--rose)}
+  .rnote{font-size:12px;color:var(--dim);margin-top:8px}
+  .scroller{overflow-x:auto;padding-bottom:6px}
+  table.grid{border-collapse:separate;border-spacing:1px;font-variant-numeric:tabular-nums}
+  table.grid th{font-weight:500;font-size:10px;color:var(--dim);padding:0 1px;text-align:center;
+                font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  table.grid th.day{text-align:right;padding-right:10px;font-family:var(--cond);font-size:16px;color:var(--text);width:46px}
+  table.grid th.localhr{color:var(--sky);font-size:10px;padding-bottom:3px}
+  table.grid th.yourhrs{font-size:10px;letter-spacing:.04em;text-align:right;padding-right:8px;color:var(--sky)}
+  table.grid th.tornhrs{color:var(--brass)}
+  table.grid th.hour{text-align:right;padding-right:10px;font-size:12px;color:var(--dim);width:34px}
+  table.grid th.dayhead{font-family:var(--cond);font-size:15px;color:var(--text);padding-bottom:4px}
+  table.grid td{padding:0}
+  /* every sixth hour gets a divider so the eye can find noon without counting */
+  table.grid td.tick{border-left:1px solid var(--line)}
+  .cell{width:34px;height:30px;border-radius:2px;background:var(--empty);cursor:pointer;position:relative;
+        border:1px solid transparent;transition:transform .06s}
+  table.grid.narrow{width:100%}
+  table.grid.narrow .cell{width:auto;min-width:0;height:34px}
+  table.grid.narrow td{width:14.28%}
+  .cell.on{background:var(--brass)}
+  .cell.sel{border-color:#fff;z-index:2}
+  .cell:focus-visible{outline:2px solid #fff;outline-offset:1px}
+  .count{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:600;color:#0E1A1F;pointer-events:none}
+  .count.pale{color:#DCE8EA}
+
+  /* legend */
+  .legend{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:13px;margin-top:14px;flex-wrap:wrap}
+  .swatches{display:flex;gap:2px}
+  .sw{width:22px;height:12px;border-radius:1px}
+
+  /* members */
+  .members{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:1px;
+           grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+  .members li{display:flex;align-items:center;gap:9px;background:var(--panel-2);
+              padding:7px 8px 7px 12px;border-radius:2px;min-width:0}
+  .members .nm{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  a.pl{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+  a.pl:hover{color:var(--brass);border-bottom-color:var(--brass)}
+  a.pl:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .members .vf{font-size:10px;padding:1px 6px;border-radius:2px;border:1px solid var(--line);
+               color:var(--dim);flex:none}
+  .members .vf.yes{color:var(--brass);border-color:var(--brass)}
+  .members .tz{color:var(--dim);font-size:12px;margin-left:auto;font-variant-numeric:tabular-nums;
+               white-space:nowrap;flex:none}
+  .empty-state{border:1px dashed var(--line);border-radius:3px;padding:24px;text-align:center;color:var(--dim);margin-bottom:18px}
+
+  /* detail + windows */
+  .detail{background:var(--panel-2);border-left:3px solid var(--brass);padding:14px 16px;border-radius:2px;margin-top:18px}
+  .detail h3{font-family:var(--cond);font-size:20px;margin:0 0 8px;font-weight:600}
+  .roster{list-style:none;margin:0;padding:0;display:grid;gap:1px;
+          grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .roster li{font-size:14px;padding:6px 10px;border-radius:2px;background:rgba(255,255,255,.04);
+             font-variant-numeric:tabular-nums;display:flex;gap:10px;align-items:baseline}
+  .roster li .dot{width:6px;height:6px;border-radius:50%;background:var(--brass);flex:none}
+  .roster .lt{color:var(--dim);margin-left:auto;font-size:13px}
+  .roster li.off{background:none;color:var(--dim)}
+  .roster li.off .dot{background:var(--line)}
+  .roster-head{font-size:13px;color:var(--dim);margin:12px 0 6px}
+  .roster-head:first-of-type{margin-top:0}
+  .windows{list-style:none;margin:0;padding:0}
+  .windows li{display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  .windows li:last-child{border-bottom:none}
+  .win-time{font-family:var(--cond);font-size:21px;min-width:170px}
+  .win-n{color:var(--brass);font-weight:600}
+  .win-len{color:var(--dim);font-size:13px;margin-left:auto}
+  hr.sep{border:none;border-top:1px solid var(--line);margin:26px 0}
+  .warn{color:var(--rose);font-size:13px;min-height:18px;margin-top:6px}
+  .ok{color:var(--brass);font-size:13px;min-height:18px;margin-top:6px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:600px){.roster{grid-template-columns:1fr}}
+</style>
+
+<div class="clock">
+  <div class="wrap">
+    <div class="brand">
+      <img class="banner" src="banner.png" alt="" onerror="this.remove()">
+      <div class="masthead">Wanderer&rsquo;s Refuge<span>Faction hours</span></div>
+    </div>
+    <div class="clockrow">
+      <span class="tct-label">Torn City Time</span>
+      <span class="tct" id="tct">--:--</span>
+      <span class="yours" id="yours"></span>
+      <span class="whoami" id="whoami" hidden></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="loginbar" id="loginbar">
+    <form id="login-form" autocomplete="off" onsubmit="return false">
+      <div class="lb-row">
+        <div class="lb-field">
+          <label for="signkey">Torn <strong>Public</strong> API key</label>
+          <input id="signkey" name="fh-torn-key" type="password" autocomplete="off"
+                 spellcheck="false" placeholder="16 characters">
+        </div>
+        <button class="primary" id="do-signin" type="button">Sign in</button>
+        <button class="quiet" id="show-alt" type="button">Other ways in</button>
+      </div>
+      <div class="lb-alt" id="lb-alt" hidden>
+        <div class="lb-row">
+          <div class="lb-field">
+            <label for="adminkey">Shared admin key</label>
+            <input id="adminkey" name="fh-admin-key" type="password" autocomplete="off"
+                   spellcheck="false" placeholder="Leaders only">
+          </div>
+          <button id="save-admin" type="button">Use admin key</button>
+        </div>
+        <p class="hint" style="margin:8px 0 0">Leaders and co-leaders get admin automatically by signing in with their own API key above. This is only a way in if that fails.</p>
+      </div>
+      <p class="lb-msg warn" id="signmsg"></p>
+      <p class="lb-msg warn" id="adminmsg"></p>
+      <p class="hint" id="lb-help">Signing in confirms you're in the faction and opens the board, the live view, the calendar and the playbook. <a href="#" id="lb-how">How do I get a key?</a></p>
+    </form>
+  </div>
+
+  <div class="demo-banner" id="demo-banner" hidden>
+    <strong>Preview mode.</strong> There's no server behind this page, so everything below is made-up sample data
+    for six invented members. Sign-in, sending hours and the live status are all switched off.
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-me" aria-selected="true" aria-controls="p-me">My hours</button>
+    <button class="tab" role="tab" id="t-fac" aria-selected="false" aria-controls="p-fac">Faction board</button>
+    <button class="tab" role="tab" id="t-now" aria-selected="false" aria-controls="p-now">Who's around</button>
+    <button class="tab" role="tab" id="t-cal" aria-selected="false" aria-controls="p-cal">Calendar</button>
+    <button class="tab" role="tab" id="t-ev" aria-selected="false" aria-controls="p-ev">Events</button>
+    <button class="tab" role="tab" id="t-nfl" aria-selected="false" aria-controls="p-nfl">NFL Run</button>
+    <button class="tab" role="tab" id="t-doc" aria-selected="false" aria-controls="p-doc">Playbook</button>
+  </div>
+
+  <!-- ================= MY HOURS ================= -->
+  <section class="pane" id="p-me" role="tabpanel" aria-labelledby="t-me">
+    <section class="why">
+      <h2>What is this?</h2>
+      <div class="why-body" id="why-body">
+        <p>A faction member timezone tracker, made by manhat. Linking up with people scattered across other timezones is a pain, and working out whose evening lines up with whose lunch break shouldn't take a spreadsheet. This is my attempt at solving that.</p>
+        <p>Mark the hours you're usually about, and the board works out the rest for everyone at once.</p>
+        <h3>Why is this a thing</h3>
+<p>Chains die because nobody was around to keep them alive. Events get scheduled for the middle of somebody's night. And when a war lands, the hard part is working out which hours are best for everyone. None of that has to be guesswork.</p>
+      <p>If everyone marks their usual hours, this board shows exactly how many of us are online for every hour of the week, in Torn time, with all the timezone maths already done. Chains get started when there are enough people awake to feed them rather than dying at 40. Wars turn up when they turn up, but once one does, you can see at a glance which hours we've got the numbers to push and which ones need somebody to set an alarm.</p>
+      <p>It takes a minute, and it's worth doing to help the faction be the best it can be. Finding out that one person is the only cover for a whole stretch of the week is exactly the kind of thing worth knowing before a war, not during one.</p>
+      <p>We know real life gets in the way. If your availability changes, come back and update it here as soon as you can. A board that's out of date is worse than no board at all. And if you can't make an event you're down for, have a word with faction management rather than leaving it.</p>
+      </div>
+      <button class="why-toggle" id="why-toggle" aria-expanded="false" aria-controls="why-body">Read more</button>
+    </section>
+
+    <h2>Paint the hours you're usually around</h2>
+    <p class="hint" id="entry-hint">All times are in <em>your</em> local time.</p>
+    <div class="row">
+      <div><label for="myname">Your name in Torn</label>
+        <select id="myname" style="min-width:200px"><option value="">Loading the faction…</option></select></div>
+      <div><label for="mytz">Your timezone</label><select id="mytz"></select></div>
+    </div>
+    <div class="warn" id="rostermsg" style="margin-top:-10px;margin-bottom:14px"></div>
+    <div id="range-wrap" hidden>
+      <div id="ranges"></div>
+      <button id="add-range">+ Add another time</button>
+    </div>
+    <p class="hint" id="preview-label" hidden>What that adds up to:</p>
+    <div class="scroller"><table class="grid" id="mygrid"></table></div>
+    <div class="row" style="margin-top:16px">
+      <button id="clear-mine" class="quiet">Clear everything</button>
+      <button id="weeknights" class="quiet">Fill weekday evenings</button>
+    </div>
+    <hr class="sep">
+    <h2>Send your hours to the faction board</h2>
+    <p class="hint">You need the passphrase your faction leader gave you. The API key is your choice. You can send without it.</p>
+    <div class="row">
+      <div><label for="joinpass">Faction passphrase <span class="tag req">Required</span></label>
+        <input id="joinpass" type="text" size="20" autocomplete="off" spellcheck="false" name="fh-phrase"></div>
+      <button class="primary" id="do-send">Send to board</button>
+    </div>
+    <div class="warn" id="sendmsg"></div>
+    <p class="hint" style="margin-top:10px">Adding a key is worth doing if you're happy to. It locks your entry to you, so nobody else can overwrite your hours. Without it, anyone who has the passphrase could submit hours under your name. Either way your hours go on the board and count towards coverage exactly the same.</p>
+    <details style="margin-top:6px">
+      <summary style="cursor:pointer;color:var(--brass);font-size:14px">How do I get a Public API key, and is it safe?</summary>
+      <ol class="steps">
+        <li>In Torn, open <a class="ext" href="https://www.torn.com/preferences.php#tab=api" target="_blank" rel="noopener">Settings, then the API Keys tab</a>.</li>
+        <li>Give the new key a name you'll recognise later, such as <code>Faction Hours</code>.</li>
+        <li>Set the access level to <strong>Public Only</strong>. That's the lowest of the four levels, and it's all this site needs.</li>
+        <li>Create the key, then copy the 16 characters it gives you and paste them into the box above.</li>
+      </ol>
+      <p class="hint" style="margin-top:14px">A Public key exposes only what anyone can already see by looking at your profile. It cannot show your money, your items, your battle stats, your logs or anything else private. Those need Minimal, Limited or Full keys, and this site will never ask you for one.</p>
+      <p class="hint">No Torn API key of any level can log into your account or change a single thing, because the API only ever reads. Your key holds nothing about your password.</p>
+      <p class="hint">Your key is sent once, used to read your player ID, and then thrown away. It is never written to disk on this server.</p>
+    </details>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--dim);font-size:14px">Move your hours to another device</summary>
+      <p class="hint" style="margin-top:12px">Copy this code and paste it into the box below on your other device. You only need this to edit the same hours elsewhere. Sending to the board doesn't require it.</p>
+      <textarea id="mycode" readonly autocomplete="off"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="copy-mine">Copy code</button>
+        <span class="ok" id="copied"></span>
+      </div>
+      <textarea id="loadcode" placeholder="TSC1-..." style="margin-top:8px" autocomplete="off"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="do-load">Load into grid</button>
+        <span class="warn" id="loadmsg"></span>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= FACTION BOARD ================= -->
+  <section class="pane" id="p-fac" role="tabpanel" aria-labelledby="t-fac" hidden>
+    <div class="locked-note"><h2>The board is locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device. There are step-by-step instructions on that tab. You can send hours without a key if you'd rather, and they'll still count, but this stays shut.</p></div>
+    <div class="gated" hidden>
+    <h2>Who's around, in Torn City Time</h2>
+    <p class="hint">This board is shared. Everyone in the faction sees the same thing, updating as people send their hours in.</p>
+    <div class="row">
+      <span class="ok" id="livemsg"></span>
+      <button id="do-refresh" class="quiet" style="margin-left:auto">Refresh now</button>
+    </div>
+
+    <div id="roster-box"></div>
+    <hr class="sep">
+
+    <h2>Coverage across the week</h2>
+    <p class="hint">Each square is one hour of Torn City Time. Click any square to see exactly who's on and what time it is for them.</p>
+    <div class="scroller"><table class="grid" id="facgrid"></table></div>
+    <div class="legend">
+      <span>Nobody</span><div class="swatches" id="swatches"></div><span id="legmax">Everyone</span>
+    </div>
+    <div class="detail" id="detail" hidden></div>
+
+    <hr class="sep">
+    <h2>Your best windows</h2>
+    <div class="row">
+      <div><label for="minp">Show blocks with at least</label>
+        <select id="minp"></select></div>
+      <div><label for="minlen">and lasting at least</label>
+        <select id="minlen">
+          <option value="1">1 hour</option>
+          <option value="2" selected>2 hours</option>
+          <option value="3">3 hours</option>
+          <option value="4">4 hours</option>
+        </select></div>
+    </div>
+    <ul class="windows" id="windows"></ul>
+    </div>
+
+    <hr class="sep">
+
+  </section>
+
+  <!-- ================= WHO'S AROUND ================= -->
+  <section class="pane" id="p-now" role="tabpanel" aria-labelledby="t-now" hidden>
+    <div class="locked-note"><h2>This is locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device. There are step-by-step instructions on that tab. You can send hours without a key if you'd rather, and they'll still count, but this stays shut.</p></div>
+    <div class="gated" hidden>
+    <h2>Right now</h2>
+    <p class="hint">Live from Torn, refreshed every couple of minutes.</p>
+    <div class="tiles" id="now-tiles"></div>
+    <div id="now-groups"></div>
+    <p class="hint" id="now-updated"></p>
+    </div>
+  </section>
+
+  <!-- ================= CALENDAR ================= -->
+  <section class="pane" id="p-cal" role="tabpanel" aria-labelledby="t-cal" hidden>
+    <div class="locked-note"><h2>This is locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device. There are step-by-step instructions on that tab.</p></div>
+    <div class="gated" hidden>
+      <div id="chain-box"></div>
+      <h2>What's coming up</h2>
+      <p class="hint">Ranked wars come straight from Torn and keep themselves up to date. Everything else is added here. The number on the right is how many people's hours cover the start.</p>
+      <div class="chips" id="cal-filters"></div>
+      <div class="cal-head">
+        <button id="cal-prev" class="quiet" aria-label="Previous month">&#9664;</button>
+        <span class="cal-month" id="cal-month"></span>
+        <button id="cal-next" class="quiet" aria-label="Next month">&#9654;</button>
+        <button id="cal-today" class="quiet">Today</button>
+      </div>
+      <div class="cal-dow" id="cal-dow"></div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="cal-detail"></div>
+      <p class="hint" id="cal-note"></p>
+
+      <div class="admin-only" hidden>
+        <hr class="sep">
+        <h2 id="cal-form-title">Add something to the calendar</h2>
+        <div class="row">
+          <div><label for="ce-title">Title</label><input id="ce-title" size="26" placeholder="Training night" autocomplete="off"></div>
+          <div><label for="ce-type">Type</label><select id="ce-type">
+            <option value="event">Event</option><option value="war">War</option>
+            <option value="chain">Chain</option><option value="note">Note</option></select></div>
+          <div><label for="ce-start">Starts (your local time)</label><input id="ce-start" type="datetime-local" autocomplete="off"></div>
+          <div><label for="ce-end">Ends</label><input id="ce-end" type="datetime-local" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div style="flex:1;min-width:260px"><label for="ce-body">Notes</label>
+            <textarea id="ce-body" placeholder="Bank energy beforehand." autocomplete="off"></textarea></div>
+        </div>
+        <div class="row">
+          <button class="primary" id="ce-save">Save entry</button>
+          <button id="ce-cancel" class="quiet" hidden>Cancel edit</button>
+          <span class="warn" id="ce-msg"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EVENTS ================= -->
+  <section class="pane" id="p-ev" role="tabpanel" aria-labelledby="t-ev" hidden>
+    <div class="locked-note"><h2>Events are locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device. There are step-by-step instructions on that tab. You can send hours without a key if you'd rather, and they'll still count, but this stays shut.</p></div>
+    <div class="gated" hidden>
+    <div id="ev-next"></div>
+    <hr class="sep">
+    <h2>Coming up after that</h2>
+    <ul class="evlist" id="ev-list"></ul>
+    <div class="admin-only" id="ev-admin" hidden>
+      <hr class="sep">
+      <h2 id="ev-form-title">Add an event</h2>
+      <p class="hint">These repeat every year. Use a rule for the two that move.</p>
+      <div class="row">
+        <div><label for="ae-name">Name</label><input id="ae-name" size="22" autocomplete="off"></div>
+        <div><label for="ae-rule">When</label><select id="ae-rule">
+          <option value="fixed">Fixed date</option>
+          <option value="easter">Easter (moves)</option>
+          <option value="beerday">First Friday of August</option></select></div>
+        <div><label for="ae-month">Month</label><input id="ae-month" type="number" min="1" max="12" size="3" autocomplete="off"></div>
+        <div><label for="ae-day">Day</label><input id="ae-day" type="number" min="1" max="31" size="3" autocomplete="off"></div>
+        <div><label for="ae-days">Lasts (days)</label><input id="ae-days" type="number" min="1" max="60" size="3" value="1" autocomplete="off"></div>
+        <div><label for="ae-sure">Date is</label><select id="ae-sure">
+          <option value="1">Confirmed</option><option value="0">Approximate</option></select></div>
+      </div>
+      <div class="row"><div style="flex:1;min-width:260px"><label for="ae-what">What it is</label>
+        <textarea id="ae-what" autocomplete="off"></textarea></div></div>
+      <div class="row"><div style="flex:1;min-width:260px"><label for="ae-tip">Tip (optional)</label>
+        <textarea id="ae-tip" autocomplete="off"></textarea></div></div>
+      <div class="row">
+        <button class="primary" id="ae-save">Save event</button>
+        <button id="ae-cancel" class="quiet" hidden>Cancel edit</button>
+        <span class="warn" id="ae-msg"></span>
+      </div>
+    </div>
+
+    <p class="hint" style="margin-top:18px">Dates marked <em>approximate</em> move each year or get announced late. Torn's in-game Calendar is the authority, and most daily events start somewhere between 10:00 and 16:00 TCT depending on the slot you picked in your own calendar settings.</p>
+    </div>
+  </section>
+
+  <!-- ================= NFL ================= -->
+  <section class="pane" id="p-nfl" role="tabpanel" aria-labelledby="t-nfl" hidden>
+    <div class="locked-note"><h2>This is locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device.</p></div>
+    <div class="gated" hidden>
+      <div class="nfl-head">
+        <h2 id="nfl-week">NFL Run</h2>
+        <button id="nfl-refresh" class="quiet">Refresh</button>
+      </div>
+      <p class="hint">Your team loses, you owe hits. Results come straight from the scoreboard, so there's nothing to check and nothing to argue about.</p>
+      <div id="nfl-you"></div>
+      <div id="nfl-slaps"></div>
+      <div class="tiles" id="nfl-tiles"></div>
+      <h3 class="nfl-h3">The whole board</h3>
+      <p class="hint" style="margin:-4px 0 10px">Click any row for the fixture, records and kickoff time.</p>
+      <div id="nfl-board"></div>
+      <div id="nfl-forfeits"></div>
+      <h3 class="nfl-h3" id="nfl-month-h">This month's prize</h3>
+      <p class="hint" style="margin:-4px 0 10px">Winner takes <strong>a couple of Xanax</strong>. Most hits completed by someone who lost, so only people whose team has lost this month are in the running. In this faction, losing can make you a winner.</p>
+      <div id="nfl-monthly"></div>
+      <h3 class="nfl-h3">Season so far</h3>
+      <div id="nfl-season"></div>
+      <h3 class="nfl-h3">Past weeks</h3>
+      <div class="row" style="margin-bottom:10px">
+        <div><label for="hist-week">Week</label><select id="hist-week"></select></div>
+      </div>
+      <div id="nfl-history"></div>
+      <p class="hint" id="nfl-note"></p>
+
+
+    </div>
+  </section>
+
+  <!-- ================= PLAYBOOK ================= -->
+  <section class="pane" id="p-doc" role="tabpanel" aria-labelledby="t-doc" hidden>
+    <div class="locked-note"><h2>This is locked</h2><p>Head to the My hours tab and send your hours through with a Torn <strong>Public</strong> API key. Public is the lowest of Torn's four access levels and shows nothing beyond what's already on your profile, but it does confirm you're really in the faction, and it opens this up for good on this device. There are step-by-step instructions on that tab.</p></div>
+    <div class="gated" hidden>
+      <p class="hint">How we fight, what works, and what not to do. Keep it off Discord and off the forums.</p>
+      <div class="chips" id="doc-tabs"></div>
+      <div id="doc-view"></div>
+      <div class="admin-only" hidden>
+        <hr class="sep">
+        <div class="row">
+          <button id="doc-edit">Edit this page</button>
+          <button id="doc-new">New page</button>
+          <span class="warn" id="doc-msg"></span>
+        </div>
+        <div id="doc-editor" hidden>
+          <div class="row"><div style="flex:1;min-width:260px">
+            <label for="doc-title">Page title</label><input id="doc-title" style="width:100%" autocomplete="off"></div></div>
+          <div class="row"><div style="flex:1;min-width:260px">
+            <label for="doc-body">Body. Use # for a heading, - for a bullet, **bold**.</label>
+            <textarea id="doc-body" style="min-height:320px;font-size:14px" autocomplete="off"></textarea></div></div>
+          <div class="row"><button class="primary" id="doc-save">Save page</button>
+            <button id="doc-cancel" class="quiet">Cancel</button>
+            <button id="doc-delete" class="quiet" style="margin-left:auto">Delete this page</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const N=168;
+
+/* ---------- storage that degrades quietly ---------- */
+const store=(()=>{
+  let ok=false;
+  try{localStorage.setItem("__t","1");localStorage.removeItem("__t");ok=true;}catch(e){}
+  const mem={};
+  return{
+    get(k){try{return ok?localStorage.getItem(k):mem[k]??null;}catch(e){return mem[k]??null;}},
+    set(k,v){try{ok?localStorage.setItem(k,v):mem[k]=v;}catch(e){mem[k]=v;}}
+  };
+})();
+
+/* ---------- timezone maths ---------- */
+function tzOffset(tz,date){
+  const p=new Intl.DateTimeFormat("en-US",{timeZone:tz,hour12:false,year:"numeric",month:"2-digit",
+    day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"})
+    .formatToParts(date).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  const asUTC=Date.UTC(+p.year,+p.month-1,+p.day,(+p.hour)%24,+p.minute,+p.second);
+  return asUTC-date.getTime();
+}
+function wallToInstant(tz,Y,M,D,h){
+  const guess=Date.UTC(Y,M,D,h,0,0);
+  let inst=guess-tzOffset(tz,new Date(guess));
+  inst=guess-tzOffset(tz,new Date(inst));
+  return inst;
+}
+function refMonday(){
+  const n=new Date();
+  const d=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate());
+  const dow=(new Date(d).getUTCDay()+6)%7;
+  return new Date(d+(7-dow)%7*864e5);
+}
+const mapCache={};
+function slotMap(tz){                       // local slot index -> TCT slot index
+  if(mapCache[tz])return mapCache[tz];
+  const ref=refMonday(),m=new Array(N);
+  for(let d=0;d<7;d++){
+    const day=new Date(ref.getTime()+d*864e5);
+    const Y=day.getUTCFullYear(),M=day.getUTCMonth(),D=day.getUTCDate();
+    for(let h=0;h<24;h++){
+      const t=new Date(wallToInstant(tz,Y,M,D,h));
+      m[d*24+h]=((t.getUTCDay()+6)%7)*24+t.getUTCHours();
+    }
+  }
+  return mapCache[tz]=m;
+}
+function invMap(tz){                         // TCT slot index -> local slot index
+  const m=slotMap(tz),inv=new Array(N).fill(0);
+  for(let i=0;i<N;i++)inv[m[i]]=i;
+  return inv;
+}
+const pad=n=>String(n).padStart(2,"0");
+/* Names link straight to the Torn profile so you can act on what you're seeing
+   without hunting for the person. */
+function nameLink(name,id){
+  if(!id){const s=document.createElement("span");s.textContent=name;return s;}
+  const a=document.createElement("a");
+  a.className="pl";a.href="https://www.torn.com/profiles.php?XID="+id;
+  a.target="_blank";a.rel="noopener";a.textContent=name;a.title="Open "+name+"'s profile in Torn";
+  return a;
+}
+const slotLabel=i=>DAYS[Math.floor(i/24)]+" "+pad(i%24)+":00";
+
+/* ---------- share codes ---------- */
+function gridToB64(g){
+  const b=new Uint8Array(21);
+  for(let i=0;i<N;i++)if(g[i])b[i>>3]|=1<<(i&7);
+  return btoa(String.fromCharCode(...b));
+}
+function b64ToGrid(s){
+  const r=atob(s),g=new Array(N).fill(false);
+  for(let i=0;i<N;i++)g[i]=!!(r.charCodeAt(i>>3)&(1<<(i&7)));
+  return g;
+}
+function encode(name,tz,tctGrid){
+  return "TSC1-"+btoa(unescape(encodeURIComponent(
+    JSON.stringify({n:name,z:tz,g:gridToB64(tctGrid)}))));
+}
+function decode(code){
+  const raw=String(code).trim().replace(/\s+/g,"").replace(/^TSC1-/,"");
+  const o=JSON.parse(decodeURIComponent(escape(atob(raw))));
+  if(!o.n||!o.z||!o.g)throw 0;
+  Intl.DateTimeFormat(undefined,{timeZone:o.z});     // throws on a bad zone
+  return{name:o.n,tz:o.z,tct:b64ToGrid(o.g)};
+}
+
+/* ---------- state ---------- */
+const localTz=Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC";
+let me={id:0,name:"",tz:localTz,local:new Array(N).fill(false)};
+let members=[];
+let roster=[];
+let selected=null;
+
+/* ---------- clock ---------- */
+function tick(){
+  const n=new Date();
+  document.getElementById("tct").textContent=pad(n.getUTCHours())+":"+pad(n.getUTCMinutes())+":"+pad(n.getUTCSeconds());
+  const mine=new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit",hour12:false,weekday:"short"}).format(n);
+  const diff=Math.round(tzOffset(localTz,n)/36e5);
+  document.getElementById("yours").innerHTML="Where you are it's <b>"+mine+"</b>, "+
+    (diff===0?"same as Torn":(diff>0?"+":"")+diff+"h from Torn");
+}
+setInterval(tick,1000);tick();
+
+/* ---------- timezone picker ---------- */
+(function(){
+  const sel=document.getElementById("mytz");
+  let zones;
+  try{zones=Intl.supportedValuesOf("timeZone");}catch(e){
+    zones=["UTC","Europe/London","Europe/Dublin","Europe/Lisbon","Europe/Paris","Europe/Berlin","Europe/Madrid",
+    "Europe/Rome","Europe/Warsaw","Europe/Athens","Europe/Helsinki","Europe/Moscow","Europe/Istanbul",
+    "America/St_Johns","America/Halifax","America/New_York","America/Toronto","America/Chicago","America/Denver",
+    "America/Phoenix","America/Los_Angeles","America/Anchorage","Pacific/Honolulu","America/Mexico_City",
+    "America/Bogota","America/Sao_Paulo","America/Argentina/Buenos_Aires","Africa/Lagos","Africa/Cairo",
+    "Africa/Johannesburg","Africa/Nairobi","Asia/Jerusalem","Asia/Dubai","Asia/Karachi","Asia/Kolkata",
+    "Asia/Dhaka","Asia/Bangkok","Asia/Jakarta","Asia/Singapore","Asia/Manila","Asia/Hong_Kong","Asia/Shanghai",
+    "Asia/Seoul","Asia/Tokyo","Australia/Perth","Australia/Adelaide","Australia/Brisbane","Australia/Sydney",
+    "Pacific/Auckland"];
+    if(!zones.includes(localTz))zones.push(localTz);
+  }
+  const now=new Date();
+  zones.forEach(z=>{
+    let off;try{off=Math.round(tzOffset(z,now)/36e5);}catch(e){return;}
+    const o=document.createElement("option");
+    o.value=z;o.textContent=z.replace(/_/g," ")+"  (UTC"+(off>=0?"+":"")+off+")";
+    sel.appendChild(o);
+  });
+  sel.value=localTz;
+  sel.onchange=()=>{me.tz=sel.value;saveMe();renderCode();};
+})();
+
+/* ---------- grid builder ---------- */
+/* Two layouts from one data model. Wide screens get hours across the top,
+   which reads like a timeline. Narrow screens get days across the top, because
+   7 columns fit a phone and 24 never will. Either way the returned array is
+   indexed by slot number, so nothing downstream has to know or care. */
+const NARROW_UNDER = 640;
+const isNarrow = () => window.innerWidth < NARROW_UNDER;
+
+function buildGrid(el,onPaint,dualHeader){
+  const narrow=isNarrow();
+  el.innerHTML="";
+  el.className="grid"+(narrow?" narrow":"");
+  const cells=new Array(N);
+
+  const mkCell=(td,slot)=>{
+    const c=document.createElement("div");
+    c.className="cell";c.dataset.i=slot;c.tabIndex=0;c.setAttribute("role","button");
+    td.appendChild(c);cells[slot]=c;
+  };
+
+  if(narrow){
+    const head=el.insertRow();
+    head.appendChild(document.createElement("th"));
+    DAYS.forEach(d=>{
+      const th=document.createElement("th");th.className="dayhead";th.textContent=d.slice(0,2);
+      head.appendChild(th);
+    });
+    for(let h=0;h<24;h++){
+      const tr=el.insertRow();
+      const th=document.createElement("th");th.className="hour";th.textContent=pad(h);
+tr.appendChild(th);
+      for(let d=0;d<7;d++)mkCell(tr.insertCell(),d*24+h);
+    }
+  }else{
+    /* Two header rows: Torn time, and the same hours where the reader is
+       sitting. Everyone gets this wrong once, and showing both beats expecting
+       people to do the arithmetic in their head. */
+    /* Only the shared coverage board needs both clocks. The painting grid is
+       already stated as being in your own time, so a second row there would be
+       noise. */
+    const offH=Math.round(tzOffset(localTz,new Date())/36e5);
+    const dual=dualHeader&&offH!==0;
+    if(dual){
+      const mine=el.insertRow();
+      const lbl=document.createElement("th");
+      lbl.className="yourhrs";lbl.textContent="Yours";
+      mine.appendChild(lbl);
+      for(let h=0;h<24;h++){
+        const th=document.createElement("th");
+        th.className="localhr";
+        th.textContent=pad((((h+offH)%24)+24)%24);
+        mine.appendChild(th);
+      }
+    }
+    const head=el.insertRow();
+    const tlbl=document.createElement("th");
+    tlbl.className="yourhrs tornhrs";tlbl.textContent=dual?"Torn":"";
+    head.appendChild(tlbl);
+    for(let h=0;h<24;h++){
+      const th=document.createElement("th");
+      th.textContent=pad(h);
+      head.appendChild(th);
+    }
+    for(let d=0;d<7;d++){
+      const tr=el.insertRow();
+      const th=document.createElement("th");
+      th.className="day";th.textContent=DAYS[d];
+tr.appendChild(th);
+      for(let h=0;h<24;h++){
+        const td=tr.insertCell();
+        if(h%6===0&&h)td.className="tick";
+        mkCell(td,d*24+h);
+      }
+    }
+  }
+
+  if(onPaint){
+    let painting=false,mode=true;
+    el.addEventListener("pointerdown",e=>{
+      const c=e.target.closest(".cell");if(!c)return;
+      e.preventDefault();painting=true;mode=!c.classList.contains("on");
+      onPaint(+c.dataset.i,mode);
+    });
+    el.addEventListener("pointerover",e=>{
+      if(!painting)return;
+      const c=e.target.closest(".cell");if(c)onPaint(+c.dataset.i,mode);
+    });
+    addEventListener("pointerup",()=>painting=false);
+    addEventListener("pointercancel",()=>painting=false);
+    el.addEventListener("keydown",e=>{
+      const c=e.target.closest(".cell");if(!c)return;
+      if(e.key===" "||e.key==="Enter"){e.preventDefault();onPaint(+c.dataset.i,!c.classList.contains("on"));}
+    });
+  }
+  return cells;
+}
+
+/* ---------- my hours ---------- */
+const paintHandler=(i,on)=>{me.local[i]=on;myCells[i].classList.toggle("on",on);saveMe();renderCode();};
+let myCells=buildGrid(document.getElementById("mygrid"),isNarrow()?null:paintHandler);
+function paintMine(){myCells.forEach((c,i)=>c.classList.toggle("on",me.local[i]));}
+function renderCode(){
+  const m=slotMap(me.tz),tct=new Array(N).fill(false);
+  for(let i=0;i<N;i++)if(me.local[i])tct[m[i]]=true;
+  document.getElementById("mycode").value=
+    me.local.some(Boolean)?encode(me.name||"me",me.tz,tct):"Paint some hours above to generate a code.";
+}
+function saveMe(){store.set("fh-me",JSON.stringify({id:me.id,name:me.name,tz:me.tz,g:gridToB64(me.local)}));}
+
+/* ---------- range editor ----------
+   Phones get ranges instead of a paintable grid: tapping tiny squares fights
+   with scrolling, and a From/To pair opens the phone's own time picker, which
+   is a far better control than anything hand-built. The grid stays on screen
+   as a read-only preview. me.local is still the single source of truth —
+   ranges are just another way to write to it. */
+let ranges=[];
+
+/* length in hours; from==to means the whole day rather than nothing */
+const runLen=r=>((r.to-r.from+24)%24)||24;
+
+function rangesToGrid(list){
+  const g=new Array(N).fill(false);
+  list.forEach(r=>{
+    if(!r.days.length)return;
+    const len=runLen(r);
+    r.days.forEach(d=>{
+      for(let k=0;k<len;k++){
+        const h=r.from+k;
+        const day=(d+Math.floor(h/24))%7;          // past midnight spills into the next day
+        g[day*24+(h%24)]=true;
+      }
+    });
+  });
+  return g;
+}
+
+/* Rebuilds a range list from whatever is painted, so a pattern drawn on a
+   desktop still makes sense when the same person opens their phone. */
+function gridToRanges(local){
+  const runs=[];
+  for(let d=0;d<7;d++){
+    let h=0;
+    while(h<24){
+      if(local[d*24+h]){let e=h;while(e<24&&local[d*24+e])e++;runs.push({d,from:h,to:e});h=e;}
+      else h++;
+    }
+  }
+  /* An evening that carries past midnight was painted as two runs; stitch it
+     back into one. Whole days are left alone so a fully-covered week doesn't
+     collapse into nonsense. */
+  const used=new Set();
+  const merged=[];
+  runs.forEach((r,i)=>{
+    if(used.has(i))return;
+    if(r.to===24&&r.from>0){
+      const nd=(r.d+1)%7;
+      const j=runs.findIndex((x,k)=>k!==i&&!used.has(k)&&x.d===nd&&x.from===0&&x.to<24);
+      if(j>=0){used.add(j);merged.push({d:r.d,from:r.from,to:runs[j].to%24});return;}
+    }
+    merged.push({d:r.d,from:r.from,to:r.to%24});
+  });
+  /* One row per distinct time pair, listing every day it applies to. */
+  const byPair=new Map();
+  merged.forEach(m=>{
+    const key=m.from+"-"+m.to;
+    if(!byPair.has(key))byPair.set(key,{from:m.from,to:m.to,days:[]});
+    const e=byPair.get(key);
+    if(!e.days.includes(m.d))e.days.push(m.d);
+  });
+  return [...byPair.values()].sort((a,b)=>a.from-b.from||a.to-b.to);
+}
+
+function applyRanges(){
+  me.local=rangesToGrid(ranges);
+  paintMine();saveMe();renderCode();renderRangeNotes();
+}
+
+function renderRangeNotes(){
+  document.querySelectorAll(".rnote").forEach((el,i)=>{
+    const r=ranges[i];if(!r)return;
+    if(!r.days.length){el.textContent="Pick at least one day.";return;}
+    const len=runLen(r);
+    el.textContent=len===24?"All day, "+len+" hours per day selected"
+      :(r.to<=r.from?"Runs past midnight into the next day, ":"")+len+" hours per day selected";
+  });
+}
+
+/* A plain scrolling list of the 24 hours. Native time inputs render as a
+   different widget on every device and insist on minutes we don't use, so
+   this is one predictable control everywhere. */
+function closeAllPickers(except){
+  document.querySelectorAll(".hp-list").forEach(l=>{
+    if(l===except)return;
+    l.hidden=true;
+    const b=l.previousSibling;if(b)b.setAttribute("aria-expanded","false");
+  });
+}
+document.addEventListener("click",e=>{if(!e.target.closest(".hp"))closeAllPickers();});
+
+function hourPicker(label,value,onPick){
+  const wrap=document.createElement("div");wrap.className="hp";
+  const btn=document.createElement("button");btn.className="hp-btn";
+  btn.setAttribute("aria-label",label);btn.setAttribute("aria-expanded","false");
+  const setLabel=v=>btn.innerHTML='<span class="caret">▾</span>'+pad(v)+":00";
+  setLabel(value);
+
+  const list=document.createElement("div");list.className="hp-list";list.hidden=true;
+  list.setAttribute("role","listbox");list.setAttribute("aria-label",label);
+  let current=value;
+  for(let h=0;h<24;h++){
+    const o=document.createElement("button");
+    o.className="hp-opt"+(h===value?" sel":"");
+    o.textContent=pad(h)+":00";o.setAttribute("role","option");
+    o.setAttribute("aria-selected",h===value);
+    o.onclick=ev=>{
+      ev.stopPropagation();
+      current=h;setLabel(h);
+      list.querySelectorAll(".hp-opt").forEach((x,i)=>{
+        x.classList.toggle("sel",i===h);x.setAttribute("aria-selected",i===h);
+      });
+      list.hidden=true;btn.setAttribute("aria-expanded","false");
+      onPick(h);
+    };
+    list.appendChild(o);
+  }
+
+  btn.onclick=ev=>{
+    ev.stopPropagation();
+    const opening=list.hidden;
+    closeAllPickers(opening?list:null);
+    list.hidden=!opening;
+    btn.setAttribute("aria-expanded",String(opening));
+    if(opening){
+      const sel=list.children[current];
+      if(sel)list.scrollTop=sel.offsetTop-list.clientHeight/2+sel.offsetHeight/2;
+    }
+  };
+  wrap.append(btn,list);
+  return wrap;
+}
+
+function rangeRow(r,idx){
+  const row=document.createElement("div");row.className="rrow";
+
+  const times=document.createElement("div");times.className="rtimes";
+  const arrow=document.createElement("span");arrow.className="arrow";arrow.textContent="→";
+  times.append(
+    hourPicker("Start time",r.from,h=>{r.from=h;applyRanges();}),
+    arrow,
+    hourPicker("End time",r.to,h=>{r.to=h;applyRanges();})
+  );
+
+  const days=document.createElement("div");days.className="rdays";
+  DAYS.forEach((name,d)=>{
+    const b=document.createElement("button");
+    b.textContent=name[0];b.title=name;
+    b.className=r.days.includes(d)?"on":"";
+    b.setAttribute("aria-pressed",r.days.includes(d));
+    b.onclick=()=>{
+      const at=r.days.indexOf(d);
+      if(at>=0)r.days.splice(at,1);else r.days.push(d);
+      b.className=r.days.includes(d)?"on":"";
+      b.setAttribute("aria-pressed",r.days.includes(d));
+      applyRanges();
+    };
+    days.appendChild(b);
+  });
+
+  const del=document.createElement("button");
+  del.className="rdel";del.innerHTML="&times;";del.title="Remove this time";
+  del.setAttribute("aria-label","Remove this time");
+  del.onclick=()=>{ranges.splice(idx,1);renderRanges();applyRanges();};
+
+  const note=document.createElement("div");note.className="rnote";
+
+  row.append(del,times,days,note);
+  return row;
+}
+
+function renderRanges(){
+  const box=document.getElementById("ranges");
+  box.innerHTML="";
+  if(!ranges.length){
+    const p=document.createElement("p");p.className="hint";
+    p.textContent="No times yet. Add one below and pick the days it applies to.";
+    box.appendChild(p);
+  }
+  ranges.forEach((r,i)=>box.appendChild(rangeRow(r,i)));
+  renderRangeNotes();
+}
+
+document.getElementById("add-range").onclick=()=>{
+  ranges.push({from:18,to:23,days:[0,1,2,3,4]});
+  renderRanges();applyRanges();
+};
+
+/* Grid painting on desktop, ranges on mobile — never both at once. */
+function setEntryMode(){
+  const narrow=isNarrow();
+  document.getElementById("range-wrap").hidden=!narrow;
+  document.getElementById("preview-label").hidden=!narrow;
+  document.getElementById("mygrid").style.pointerEvents=narrow?"none":"";
+  document.getElementById("mygrid").style.opacity=narrow?".85":"";
+  if(narrow){
+    ranges=gridToRanges(me.local);
+    if(!ranges.length)ranges=[{from:18,to:23,days:[0,1,2,3,4]}];
+    renderRanges();
+    me.local=rangesToGrid(ranges);
+    paintMine();saveMe();renderCode();
+  }
+}
+
+document.getElementById("myname").addEventListener("change",e=>{
+  me.id=+e.target.value||0;
+  me.name=e.target.selectedOptions[0]?e.target.selectedOptions[0].textContent:"";
+  if(me.id)store.set("fh-id",String(me.id));
+  saveMe();renderCode();
+});
+document.getElementById("clear-mine").onclick=()=>{
+  if(isNarrow()){ranges=[];renderRanges();applyRanges();}
+  else{me.local.fill(false);paintMine();saveMe();renderCode();}
+};
+document.getElementById("weeknights").onclick=()=>{
+  if(isNarrow()){
+    ranges.push({from:18,to:0,days:[0,1,2,3,4]});renderRanges();applyRanges();
+  }else{
+    for(let d=0;d<5;d++)for(let h=18;h<24;h++)me.local[d*24+h]=true;
+    paintMine();saveMe();renderCode();
+  }
+};
+document.getElementById("copy-mine").onclick=async()=>{
+  const v=document.getElementById("mycode").value,msg=document.getElementById("copied");
+  if(!v.startsWith("TSC1")){msg.textContent="Add your name first.";return;}
+  try{await navigator.clipboard.writeText(v);msg.textContent="Copied.";}
+  catch(e){document.getElementById("mycode").select();msg.textContent="Press Ctrl+C to copy.";}
+  setTimeout(()=>msg.textContent="",2500);
+};
+document.getElementById("do-load").onclick=()=>{
+  const msg=document.getElementById("loadmsg");
+  try{
+    const m=decode(document.getElementById("loadcode").value);
+    const inv=invMap(m.tz);
+    const keepId=me.id,keepName=me.name;
+    me={id:keepId,name:keepName,tz:m.tz,local:new Array(N).fill(false)};
+    for(let i=0;i<N;i++)if(m.tct[i])me.local[inv[i]]=true;
+    document.getElementById("mytz").value=me.tz;
+    paintMine();saveMe();renderCode();
+    msg.style.color="var(--brass)";msg.textContent="Hours loaded. Check your name is still selected above.";
+  }catch(e){msg.style.color="var(--rose)";msg.textContent="That code didn't scan. Check you copied all of it.";}
+};
+
+/* ---------- faction board ---------- */
+let facCells=buildGrid(document.getElementById("facgrid"),null,true);
+document.getElementById("facgrid").addEventListener("click",e=>{
+  const c=e.target.closest(".cell");if(!c)return;
+  selected=+c.dataset.i;renderBoard();
+});
+/* Only rebuild when the orientation actually flips — resizing a desktop window
+   shouldn't throw the DOM away on every pixel. */
+let wasNarrow=isNarrow(),resizeTimer;
+addEventListener("resize",()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    if(isNarrow()===wasNarrow)return;
+    wasNarrow=isNarrow();
+    myCells=buildGrid(document.getElementById("mygrid"),isNarrow()?null:paintHandler);
+    facCells=buildGrid(document.getElementById("facgrid"),null,true);
+    setEntryMode();paintMine();renderBoard();
+  },150);
+});
+function heat(frac){
+  if(frac<=0)return getComputedStyle(document.documentElement).getPropertyValue("--empty").trim();
+  const stops=[[43,95,110],[201,162,39],[232,85,109]];
+  const t=Math.min(1,frac)*2,k=Math.min(1,Math.max(0,t<1?t:t-1)),a=stops[t<1?0:1],b=stops[t<1?1:2];
+  return`rgb(${a.map((v,j)=>Math.round(v+(b[j]-v)*k)).join(",")})`;
+}
+function renderRoster(){
+  const box=document.getElementById("roster-box");
+  if(!members.length){
+    box.innerHTML='<div class="empty-state">Nobody has sent their hours in yet. Open the My hours tab, paint your week and send it. You\'ll be the first on the board.</div>';
+    return;
+  }
+  const ul=document.createElement("ul");ul.className="members";
+  members.forEach(m=>{
+    const li=document.createElement("li"),off=Math.round(tzOffset(m.tz,new Date())/36e5);
+    li.innerHTML='<span class="nm"></span><span class="tz">'+m.tz.replace(/_/g," ")+
+      "  UTC"+(off>=0?"+":"")+off+"</span>";
+    li.querySelector(".nm").appendChild(nameLink(m.name,m.id));
+    const vf=document.createElement("span");
+    vf.className="vf"+(m.verified?" yes":"");
+    vf.textContent=m.verified?"verified":"unverified";
+    vf.title=m.verified?"Confirmed with their own Torn API key"
+                       :"Chosen from the roster but not confirmed with an API key";
+    li.querySelector(".nm").after(vf);
+    if(isAdmin){
+      const b=document.createElement("button");
+      b.className="quiet";b.textContent="Remove";b.title="Remove "+m.name;
+      b.onclick=()=>removeMember(m);
+      li.appendChild(b);
+    }
+    ul.appendChild(li);
+  });
+  box.innerHTML="";box.appendChild(ul);
+}
+function renderBoard(){
+  renderRoster();
+  const counts=new Array(N).fill(0);
+  members.forEach(m=>{for(let i=0;i<N;i++)if(m.tct[i])counts[i]++;});
+  const max=members.length||1;
+  facCells.forEach((c,i)=>{
+    c.style.background=heat(counts[i]/max);
+    c.classList.toggle("sel",selected===i);
+    c.innerHTML=counts[i]?'<span class="count'+(counts[i]/max<0.34?" pale":"")+'">'+counts[i]+"</span>":"";
+    c.setAttribute("aria-label",slotLabel(i)+" TCT, "+counts[i]+" available");
+  });
+  const sw=document.getElementById("swatches");sw.innerHTML="";
+  for(let s=0;s<=4;s++){const d=document.createElement("div");d.className="sw";d.style.background=heat(s/4);sw.appendChild(d);}
+  document.getElementById("legmax").textContent="All "+members.length;
+
+
+  // selected slot detail
+  const det=document.getElementById("detail");
+  if(selected===null||!members.length){det.hidden=true;}
+  else{
+    det.hidden=false;
+    det.innerHTML="<h3>"+slotLabel(selected)+" TCT, "+counts[selected]+" of "+members.length+" around</h3>";
+    const on=members.filter(m=>m.tct[selected]).sort((a,b)=>a.name.localeCompare(b.name));
+    const off=members.filter(m=>!m.tct[selected]).sort((a,b)=>a.name.localeCompare(b.name));
+    const group=(label,list,isOff)=>{
+      if(!list.length)return;
+      const h=document.createElement("div");h.className="roster-head";h.textContent=label;
+      const ul=document.createElement("ul");ul.className="roster";
+      list.forEach(m=>{
+        const li=document.createElement("li"),l=invMap(m.tz)[selected];
+        if(isOff)li.className="off";
+        const dot=document.createElement("span");dot.className="dot";
+        const nm=nameLink(m.name,m.id);
+        const lt=document.createElement("span");lt.className="lt";
+        lt.textContent=DAYS[Math.floor(l/24)]+" "+pad(l%24)+":00";
+        li.append(dot,nm,lt);ul.appendChild(li);
+      });
+      det.append(h,ul);
+    };
+    group("Around: "+on.length,on,false);
+    group("Not around: "+off.length,off,true);
+  }
+  renderWindows(counts);
+}
+function renderWindows(counts){
+  const sel=document.getElementById("minp");
+  const want=+sel.value||Math.max(2,Math.ceil(members.length*0.5));
+  const minLen=+document.getElementById("minlen").value;
+  const ul=document.getElementById("windows");ul.innerHTML="";
+  if(!members.length){ul.innerHTML='<li style="color:var(--dim)">Add some members and the best blocks will show up here.</li>';return;}
+  const good=counts.map(c=>c>=want);
+  const runs=[];let i=0;
+  while(i<N&&good[i])i++;                       // start outside a run so wrapping works
+  if(i===N){runs.push({start:0,len:N,min:Math.min(...counts)});}
+  else{
+    for(let k=0;k<N;k++){
+      const p=(i+k)%N;
+      if(good[p]){
+        let len=0,mn=Infinity,q=p;
+        while(good[q%N]&&len<N){mn=Math.min(mn,counts[q%N]);len++;q++;}
+        runs.push({start:p,len,min:mn});k+=len-1;
+      }
+    }
+  }
+  const out=runs.filter(r=>r.len>=minLen).sort((a,b)=>b.min-a.min||b.len-a.len).slice(0,8);
+  if(!out.length){ul.innerHTML='<li style="color:var(--dim)">No blocks that big. Try asking for fewer people or a shorter block.</li>';return;}
+  out.forEach(r=>{
+    const end=(r.start+r.len)%N;
+    const li=document.createElement("li");
+    li.innerHTML='<span class="win-time">'+slotLabel(r.start)+" – "+DAYS[Math.floor(end/24)]+" "+pad(end%24)+':00</span>'+
+      '<span class="win-n">'+r.min+(r.min===members.length?" (everyone)":"")+"</span>"+
+      '<span class="win-len">'+r.len+"h</span>";
+    ul.appendChild(li);
+  });
+}
+function refreshMinP(){
+  const sel=document.getElementById("minp"),cur=sel.value;
+  sel.innerHTML="";
+  for(let k=1;k<=Math.max(1,members.length);k++){
+    const o=document.createElement("option");o.value=k;
+    o.textContent=k+(k===1?" person":" people");sel.appendChild(o);
+  }
+  sel.value=cur&&+cur<=members.length?cur:Math.max(1,Math.ceil(members.length*0.6));
+}
+document.getElementById("minp").onchange=()=>renderBoard();
+document.getElementById("minlen").onchange=()=>renderBoard();
+
+/* ---------- server ---------- */
+let lastSync=0;
+const liveMsg=document.getElementById("livemsg");
+function note(el,text,bad){
+  el.style.color=bad?"var(--rose)":"var(--brass)";el.textContent=text;
+}
+/* The session token is the only credential the browser holds. Keys and the
+   admin passphrase are exchanged for one and then discarded. */
+let token=store.get("fh-token")||"";
+let isAdmin=false, whoami="";
+
+async function api(path,body){
+  const headers={};
+  if(token)headers["Authorization"]="Bearer "+token;
+  if(body)headers["Content-Type"]="application/json";
+  let r;
+  try{
+    r=await fetch("/api/"+path,body?{method:"POST",headers,body:JSON.stringify(body)}:{headers});
+  }catch(e){ throw Object.assign(new Error("No server behind this page."),{noServer:true}); }
+  /* A backend always answers in JSON. Anything else means the API isn't there
+     at all, which is different from being told no. */
+  const ct=r.headers.get("content-type")||"";
+  if(!ct.includes("json")) throw Object.assign(new Error("No server behind this page."),{noServer:true});
+  const data=await r.json().catch(()=>({}));
+  if(r.status===401){ signedOut(); throw new Error(data.error||"Your session has expired. Sign in again."); }
+  if(!r.ok)throw new Error(data.error||("Server said "+r.status));
+  return data;
+}
+
+function signedIn(d){
+  if(d.token){token=d.token;store.set("fh-token",token);}
+  isAdmin=!!d.admin; whoami=d.name||"";
+  unlock();
+  renderWho();
+}
+function signedOut(){
+  token="";isAdmin=false;whoami="";
+  store.set("fh-token","");store.set("fh-unlocked","");
+  unlocked=false;applyLock();renderWho();
+}
+function renderWho(){
+  const el=document.getElementById("whoami");
+  if(!el)return;
+  el.innerHTML="";
+  if(!whoami){el.hidden=true;return;}
+  el.hidden=false;
+  const t=document.createElement("span");
+  t.textContent="Signed in as "+whoami+(isAdmin?" (admin)":"");
+  const b=document.createElement("button");
+  b.className="quiet";b.textContent="Sign out";
+  b.onclick=async()=>{try{await api("signout",{});}catch(e){}signedOut();};
+  el.append(t,b);
+  document.querySelectorAll(".admin-only").forEach(n=>{n.hidden=!isAdmin;});
+  if(typeof renderCalendar==="function"&&calData.entries.length)renderCalendar();
+}
+async function loadRoster(){
+  if(demo)return;
+  const msg=document.getElementById("rostermsg"),sel=document.getElementById("myname");
+  try{
+    const d=await api("roster");
+    roster=d.roster||[];
+    if(d.error){note(msg,"Torn roster is stale: "+d.error,true);}
+    else msg.textContent="";
+    sel.innerHTML='<option value="">Choose your name…</option>';
+    roster.forEach(r=>{
+      const o=document.createElement("option");
+      o.value=r.id;o.textContent=r.name;sel.appendChild(o);
+    });
+    const saved=store.get("fh-id");
+    if(saved&&roster.some(r=>String(r.id)===saved)){sel.value=saved;me.id=+saved;}
+  }catch(e){
+    if(e.noServer){enterDemo();return;}
+    sel.innerHTML='<option value="">Couldn\'t load the faction</option>';
+    note(msg,"Can't reach the server to load your faction. "+e.message,true);
+  }
+}
+async function loadBoard(quiet){
+  if(demo)return;
+  try{
+    const d=await api("board");
+    members=(d.members||[]).map(m=>({id:m.id,name:m.name,tz:m.tz,verified:m.verified,tct:b64ToGrid(m.g)}));
+    lastSync=Date.now();
+    refreshMinP();renderBoard();
+    const v=members.filter(m=>m.verified).length;
+    note(liveMsg,members.length+(members.length===1?" person":" people")+" on the board"+
+      (v?", "+v+" verified":"")+", updated just now");
+  }catch(e){
+    if(e.noServer){enterDemo();return;}
+    if(!quiet)note(liveMsg,"Can't reach the board right now. "+e.message,true);
+  }
+}
+async function removeMember(m){
+  if(!confirm("Remove "+m.name+" from the board?"))return;
+  try{await api("remove",{id:m.id});await loadBoard();}
+  catch(e){alert("Couldn't remove them: "+e.message);}
+}
+document.getElementById("do-refresh").onclick=()=>{loadRoster();loadBoard();};
+document.getElementById("do-send").onclick=async()=>{
+  if(demo){note(document.getElementById("sendmsg"),"Preview mode. Connect this page to its server to do that for real.",true);return;}
+  const msg=document.getElementById("sendmsg");
+  const btn=document.getElementById("do-send");
+  const code=document.getElementById("mycode").value;
+  const pass=document.getElementById("joinpass").value;
+  const apiKey="";
+  if(!me.id){note(msg,"Choose your name from the list first.",true);return;}
+  if(!me.local.some(Boolean)){note(msg,"Paint at least one hour before sending.",true);return;}
+  if(!pass&&!token){note(msg,"You need the faction passphrase, or sign in at the top with your API key.",true);return;}
+  btn.disabled=true;note(msg,"Sending…");
+  try{
+    const r=await api("submit",{pass,code,playerId:me.id,apiKey:apiKey||undefined});
+    if(r.verified)signedIn(r);
+    if(me.id)store.set("fh-id",String(me.id));
+    note(msg,r.verified
+      ? "Sent as "+r.name+" and verified. The rest of the tabs are open to you now."
+      : "Sent as "+r.name+". Your hours are on the board, but the other tabs stay locked until you send once with a Public API key.");
+    await loadBoard(true);
+  }catch(e){note(msg,e.message,true);}
+  finally{btn.disabled=false;}
+};
+document.getElementById("do-signin").onclick=async()=>{
+  if(demo){note(document.getElementById("signmsg"),"Preview mode. Connect this page to its server to do that for real.",true);return;}
+  const msg=document.getElementById("signmsg"),btn=document.getElementById("do-signin");
+  const key=document.getElementById("signkey").value.trim();
+  if(!key){note(msg,"Paste your Public API key first.",true);return;}
+  btn.disabled=true;note(msg,"Checking with Torn...");
+  try{
+    const r=await api("signin",{apiKey:key});
+    signedIn(r);
+    me.id=r.id;me.name=r.name;
+    store.set("fh-id",String(r.id));
+    document.getElementById("signkey").value="";
+
+    const sel=document.getElementById("myname");
+    if(![...sel.options].some(o=>o.value===String(r.id)))await loadRoster();
+    sel.value=String(r.id);
+
+    if(r.hours){
+      /* Hours come back in Torn time; turn them into the local grid using the
+         timezone they were sent with, so the picture matches what they drew. */
+      me.tz=r.hours.tz;
+      document.getElementById("mytz").value=me.tz;
+      const inv=invMap(r.hours.tz),tct=b64ToGrid(r.hours.g);
+      me.local=new Array(N).fill(false);
+      for(let i=0;i<N;i++)if(tct[i])me.local[inv[i]]=true;
+    }
+    saveMe();setEntryMode();paintMine();renderCode();
+    note(msg,r.hours
+      ? "Welcome back, "+r.name+". Your saved hours are loaded and everything is unlocked."
+      : "Signed in as "+r.name+". You haven't sent any hours yet, so paint them in below.");
+  }catch(e){note(msg,e.message,true);}
+  finally{btn.disabled=false;}
+};
+
+document.getElementById("save-admin").onclick=async()=>{
+  const field=document.getElementById("adminkey");
+  const msg=document.getElementById("adminmsg");
+  const key=field.value.trim();
+  if(!key){note(msg,"Paste the admin key first.",true);return;}
+  try{
+    const r=await api("admin",{admin:key});
+    field.value="";                       // exchanged for a token; we don't keep it
+    signedIn(r);
+    note(msg,"Admin access granted on this device.");
+    loadBoard(true);
+  }catch(e){note(msg,e.message,true);}
+};
+
+/* ---------- demo mode ----------
+   With no API behind the page there is nothing to sign in to, so rather than
+   showing a locked shell we fill it with obviously fake data and say so. This
+   also covers the server being down: members get an explanation instead of a
+   dead page. */
+let demo=false;
+
+function demoFaction(){
+  const rows=[
+    ["Chedburn","Europe/London",[[0,18,24],[1,18,24],[2,19,23],[3,18,24],[4,20,26],[5,10,26],[6,10,22]],"Okay","Online"],
+    ["Duke","America/New_York",[[0,17,23],[1,17,23],[2,17,23],[3,17,23],[4,16,26],[5,9,26],[6,12,23]],"Hospital","Idle"],
+    ["Yata","Asia/Tokyo",[[0,20,24],[1,20,24],[2,20,24],[3,20,24],[4,19,26],[5,8,24],[6,8,20]],"Traveling","Online"],
+    ["Bogie","Australia/Sydney",[[0,19,23],[1,19,23],[2,19,23],[3,19,23],[4,18,26],[5,9,25],[6,9,21]],"Abroad","Offline"],
+    ["Nova","America/Los_Angeles",[[0,18,24],[1,18,24],[2,18,24],[3,18,24],[4,17,27],[5,11,27],[6,11,22]],"Okay","Online"],
+    ["Manhat","Europe/London",[[0,20,26],[1,20,26],[2,20,26],[3,20,26],[4,21,28],[5,12,28],[6,12,24]],"Okay","Offline"]
+  ];
+  const now=Math.floor(Date.now()/1000);
+  roster=[];members=[];
+  const live=[];
+  rows.forEach(([name,tz,blocks,state,online],i)=>{
+    const id=1000+i;
+    roster.push({id,name,position:i===0?"Leader":i===5?"Soldier":"Member"});
+    const local=new Array(N).fill(false);
+    blocks.forEach(([d,a,b])=>{for(let h=a;h<b;h++)local[((d+Math.floor(h/24))%7)*24+h%24]=true;});
+    const map=slotMap(tz),tct=new Array(N).fill(false);
+    for(let k=0;k<N;k++)if(local[k])tct[map[k]]=true;
+    members.push({id,name,tz,verified:i%2===0,tct});
+    live.push({id,name,state,online,
+      description:state==="Hospital"?"In hospital for 14 minutes":state==="Traveling"?"Traveling to Switzerland":state==="Abroad"?"In Mexico":"Okay",
+      until:state==="Hospital"?now+840:0,
+      lastAction:now-(online==="Online"?60:online==="Idle"?900:40000),
+      since:Date.now()-18*60000});
+  });
+  liveData={members:live,updated:new Date().toISOString()};
+}
+
+function enterDemo(){
+  if(demo)return;
+  demo=true;
+  demoFaction();
+  unlock();
+  const sel=document.getElementById("myname");
+  if(sel){
+    sel.innerHTML='<option value="">Choose your name...</option>';
+    roster.forEach(r=>{const o=document.createElement("option");o.value=r.id;o.textContent=r.name;sel.appendChild(o);});
+  }
+  document.getElementById("rostermsg").textContent="";
+  refreshMinP();renderBoard();renderLive();
+  calData={entries:[
+    {id:"d1",source:"torn",type:"war",title:"Ranked war vs Purity",startsAt:Date.now()+3*864e5,
+     endsAt:Date.now()+8*864e5,body:"Target 1624. Score 3787 to 5411.",createdBy:"Torn"},
+    {id:"d2",source:"manual",type:"event",title:"Training night",startsAt:Date.now()+2*36e5,
+     endsAt:Date.now()+5*36e5,body:"Bank energy beforehand.",createdBy:"Chedburn",
+     rsvps:[{id:1000,name:"Chedburn",status:"in",note:""},{id:1001,name:"Duke",status:"in"},
+            {id:1004,name:"Nova",status:"maybe"},{id:1003,name:"Bogie",status:"out"}]},
+    {id:"d3",source:"manual",type:"note",title:"Stock up before Tourism Day",startsAt:Date.now()+18*864e5,
+     endsAt:Date.now()+19*864e5,body:"Excursion upgrades and a large suitcase.",createdBy:"Manhat"}
+  ],chain:{current:42,max:50,timeout:180,modifier:1.25,cooldown:0,start:Date.now()-9e5}};
+  renderCalendar();loadDocs();loadNfl();
+  const b=document.getElementById("demo-banner");
+  if(b)b.hidden=false;
+  const live=document.getElementById("livemsg");
+  if(live)note(live,"Demo data. Nothing here is real.");
+}
+
+/* ---------- intro ---------- */
+(function(){
+  const body=document.getElementById("why-body"),btn=document.getElementById("why-toggle");
+  if(!body||!btn)return;
+  btn.onclick=()=>{
+    const open=body.classList.toggle("open");
+    btn.setAttribute("aria-expanded",String(open));
+    btn.textContent=open?"Show less":"Read more";
+  };
+})();
+
+/* ---------- access ----------
+   The board, the live view and the events list need a session. The server
+   enforces this too; hiding tabs is only so the page isn't confusing. */
+let unlocked=!!store.get("fh-token");
+const LOCKED_TABS=["t-fac","t-now","t-cal","t-ev","t-nfl","t-doc"];
+
+function applyLock(){
+  LOCKED_TABS.forEach(id=>{
+    const t=document.getElementById(id);
+    if(!t)return;
+    if(unlocked)t.removeAttribute("data-locked"); else t.setAttribute("data-locked","1");
+  });
+  document.querySelectorAll(".locked-note").forEach(n=>{n.hidden=unlocked;});
+  document.querySelectorAll(".gated").forEach(n=>{n.hidden=!unlocked;});
+  const lb=document.getElementById("loginbar");
+  /* Removed from the DOM rather than hidden, so no password field lingers for
+     the browser to offer to save when other forms are used. */
+  if(lb&&unlocked)lb.remove(); else if(lb)lb.hidden=false;
+}
+function unlock(){
+  unlocked=true;store.set("fh-unlocked","1");applyLock();
+  loadBoard(true);loadLive(true);loadCalendar(true);loadDocs(true);loadAnnual(true);loadNfl(true);
+}
+
+/* ---------- events ----------
+   Fixed calendar dates are marked sure; anything that moves each year or gets
+   announced late is flagged approximate rather than stated as fact. */
+function easter(y){                      // Meeus/Jones/Butcher, gives Easter Sunday
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,
+        f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+        i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+        mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return Date.UTC(y,mo-1,da);
+}
+function nthWeekday(y,month,weekday,n){   // e.g. first Friday of August
+  let d=new Date(Date.UTC(y,month,1)),count=0;
+  while(true){ if(d.getUTCDay()===weekday&&++count===n)return d.getTime(); d=new Date(d.getTime()+864e5); }
+}
+const DAY=864e5;
+
+const EVENTS_FALLBACK=[
+  {id:"tourism",name:"Tourism Day",rule:"fixed",month:9,day:27,days:1,sure:true,
+   what:"The big travel day. Your entire carrying capacity doubles for the full twenty four hours.",
+   tip:"Get your Excursion upgrades and a large suitcase sorted beforehand, because every point you add is doubled too."},
+  {id:"halloween",name:"Halloween (Trick or Treat)",rule:"fixed",month:10,day:25,days:8,sure:true,
+   what:"Eight days of attacking other players to collect treats.",tip:"Stack energy cans well in advance."},
+  {id:"christmastown",name:"Christmas Town",rule:"fixed",month:12,day:15,days:20,sure:false,
+   what:"A walkable map with daily gifts, minigames and loot.",tip:"Log in every day."},
+  {id:"easter",name:"Easter Egg Hunt",rule:"easter",days:8,sure:true,
+   what:"Eggs hidden on pages across the site.",tip:""}
+];
+
+/* Dates are worked out here from the rule the server stores, so Easter and
+   beer day stay right without anyone editing them each year. */
+function eventDates(e,yr){
+  let start;
+  if(e.rule==="easter")       start=easter(yr)-6*DAY;
+  else if(e.rule==="beerday") start=nthWeekday(yr,7,5,1);
+  else                        start=Date.UTC(yr,(e.month||1)-1,e.day||1);
+  return [start,start+(e.days||1)*DAY];
+}
+let annualEvents=[];
+async function loadAnnual(quiet){
+  if(demo){renderEvents();return;}
+  try{ const d=await api("annual"); annualEvents=d.events||[]; renderEvents(); }
+  catch(err){ if(err.noServer){enterDemo();return;} console.error("Events load failed:",err); }
+}
+function upcoming(){
+  const now=Date.now(),y=new Date().getUTCFullYear(),out=[];
+  const src=annualEvents.length?annualEvents:EVENTS_FALLBACK;
+  [y,y+1].forEach(yr=>src.forEach(e=>{
+    const [start,end]=eventDates(e,yr);
+    if(end>now)out.push({...e,n:e.name||e.n,start,end,live:start<=now&&now<end});
+  }));
+  return out.sort((a,b)=>a.start-b.start);
+}
+function fmtDate(ms){
+  return new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(ms));
+}
+function untilParts(ms){
+  const t=Math.max(0,ms-Date.now());
+  return {d:Math.floor(t/DAY),h:Math.floor(t%DAY/36e5),m:Math.floor(t%36e5/60000),s:Math.floor(t%60000/1000)};
+}
+
+function renderEvents(){
+  const list=upcoming();
+  const hero=document.getElementById("ev-next");
+  const next=list[0];
+  hero.innerHTML="";
+  if(!next)return;
+  const box=document.createElement("div");box.className="ev-hero";
+  const when=document.createElement("div");when.className="when";
+  when.textContent=next.live?"HAPPENING NOW":"NEXT UP";
+  const h=document.createElement("h2");h.textContent=next.n;
+  if(next.sure===false){const a=document.createElement("span");a.className="approx";a.textContent="approximate";h.appendChild(a);}
+  const clock=document.createElement("div");clock.className="ev-clock";clock.id="ev-clock";
+  clock.dataset.target=next.live?next.end:next.start;
+  clock.dataset.live=next.live?"1":"";
+  const dt=document.createElement("p");dt.className="hint";dt.style.margin="0 0 10px";
+  dt.textContent=fmtDate(next.start)+(next.end-next.start>DAY*1.5?" to "+fmtDate(next.end-DAY):"")+" (Torn time)";
+  box.append(when,h,clock,dt);
+  if(next.what){const w=document.createElement("p");w.textContent=next.what;box.appendChild(w);}
+  if(next.tip){const p=document.createElement("p");p.style.marginTop="10px";p.textContent=next.tip;box.appendChild(p);}
+  if(isAdmin&&!demo){
+    const acts=document.createElement("div");acts.className="acts";acts.style.marginTop="12px";
+    const ed=document.createElement("button");ed.className="quiet";ed.textContent="Edit";
+    ed.onclick=()=>startEventEdit(next);
+    const del=document.createElement("button");del.className="quiet";del.textContent="Delete";
+    del.onclick=async()=>{
+      if(!confirm("Remove "+next.n+" from the event list?"))return;
+      try{await api("annual/delete",{id:next.id});await loadAnnual();}catch(err){alert(err.message);}
+    };
+    acts.append(ed,del);box.appendChild(acts);
+  }
+  hero.appendChild(box);
+
+  const ul=document.getElementById("ev-list");ul.innerHTML="";
+  list.slice(1,7).forEach(e=>{
+    const li=document.createElement("li");li.className="head";
+    li.tabIndex=0;li.setAttribute("role","button");li.setAttribute("aria-expanded","false");
+    const caret=document.createElement("span");caret.className="caret";caret.textContent="\u25B8";
+    const nm=document.createElement("span");nm.className="nm";nm.textContent=e.n;
+    if(e.sure===false){const a=document.createElement("span");a.className="approx";a.textContent="approx";nm.appendChild(a);}
+    const dt2=document.createElement("span");dt2.className="dt";dt2.textContent=fmtDate(e.start);
+    const aw=document.createElement("span");aw.className="away";
+    const p=untilParts(e.start);
+    aw.textContent=p.d>0?p.d+(p.d===1?" day":" days")+" away":"today";
+    li.append(caret,nm,dt2,aw);ul.appendChild(li);
+
+    const body=document.createElement("li");body.className="body";body.hidden=true;
+    const txt=document.createElement("p");txt.textContent=e.what||"No notes on this one yet.";
+    body.appendChild(txt);
+    if(e.tip){const t=document.createElement("p");t.style.marginTop="8px";t.style.color="var(--text)";
+      t.textContent=e.tip;body.appendChild(t);}
+    ul.appendChild(body);
+
+    const toggle=()=>{
+      const open=body.hidden;
+      body.hidden=!open;
+      caret.textContent=open?"\u25BE":"\u25B8";
+      li.setAttribute("aria-expanded",String(open));
+    };
+    li.onclick=toggle;
+    li.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();toggle();}};
+
+    if(isAdmin&&!demo){
+      const acts=document.createElement("div");acts.className="acts";acts.style.marginTop="4px";
+      const ed=document.createElement("button");ed.className="quiet";ed.textContent="Edit";
+      ed.onclick=ev=>{ev.stopPropagation();startEventEdit(e);};
+      const del=document.createElement("button");del.className="quiet";del.textContent="Delete";
+      del.onclick=async ev=>{
+        ev.stopPropagation();
+        if(!confirm("Remove "+e.n+" from the event list?"))return;
+        try{await api("annual/delete",{id:e.id});await loadAnnual();}catch(err){alert(err.message);}
+      };
+      acts.append(ed,del);
+      body.appendChild(acts);
+    }
+  });
+  const af=document.getElementById("ev-admin");
+  if(af)af.hidden=!isAdmin||demo;
+  tickEventClock();
+}
+
+function tickEventClock(){
+  const c=document.getElementById("ev-clock");if(!c)return;
+  const p=untilParts(+c.dataset.target);
+  if(p.d===0&&p.h===0&&p.m===0&&p.s===0){renderEvents();return;}
+  const bit=(v,l)=>v+"<small>"+l+"</small>";
+  c.innerHTML=(c.dataset.live?"<span class='ev-live'>ends in</span> ":"")+
+    (p.d?bit(p.d,p.d===1?"day":"days"):"")+bit(p.h,"h")+bit(p.m,"m")+bit(p.s,"s");
+}
+setInterval(tickEventClock,1000);
+
+/* ---------- who's around ---------- */
+let liveData={members:[],updated:null};
+
+const ago=ts=>{
+  const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1)return "just now";
+  if(m<60)return m+"m ago";
+  const h=Math.floor(m/60);
+  return h<24?h+"h ago":Math.floor(h/24)+"d ago";
+};
+const countdown=untilSec=>{
+  const left=untilSec*1000-Date.now();
+  if(left<=0)return "out now";
+  const m=Math.floor(left/60000),ss=Math.floor(left%60000/1000);
+  return m>=60?Math.floor(m/60)+"h "+(m%60)+"m":m+":"+pad(ss);
+};
+
+async function loadLive(quiet){
+  if(demo)return;
+  try{
+    liveData=await api("live");
+    renderLive();
+  }catch(e){
+    if(e.noServer){enterDemo();return;}
+    if(!quiet)document.getElementById("now-updated").textContent="Can't reach the server: "+e.message;
+  }
+}
+
+function personRow(m,extra){
+  const li=document.createElement("li");
+  const dot=document.createElement("span");
+  dot.className="dot"+(m.online==="Online"?" on":m.online==="Idle"?" idle":"");
+  dot.title=m.online;
+  const nm=nameLink(m.name,m.id);
+  const meta=document.createElement("span");meta.className="meta";
+  if(extra)meta.appendChild(extra); else meta.textContent=m.lastAction?ago(m.lastAction*1000):"";
+  li.append(dot,nm,meta);
+  return li;
+}
+
+function renderLive(){
+  const ms=liveData.members||[];
+  const isUp=m=>m.online==="Online"||m.online==="Idle";
+  const hosp=ms.filter(m=>m.state==="Hospital");
+  const away=ms.filter(m=>m.state==="Traveling"||m.state==="Abroad");
+  const jail=ms.filter(m=>m.state==="Jail"||m.state==="Federal");
+  const ready=ms.filter(m=>m.state==="Okay"&&isUp(m));
+  const idleOk=ms.filter(m=>m.state==="Okay"&&!isUp(m));
+
+  const tiles=document.getElementById("now-tiles");
+  tiles.innerHTML="";
+  [["ok",ready.length,"ready to hit"],
+   ["hosp",hosp.length,"in hospital"],
+   ["trav",away.length,"abroad or flying"],
+   ["",ms.filter(isUp).length+" / "+ms.length,"online at all"]].forEach(([cls,n,label])=>{
+    const d=document.createElement("div");d.className="tile"+(cls?" "+cls:"");
+    d.innerHTML='<div class="n"></div><div class="l"></div>';
+    d.querySelector(".n").textContent=n;d.querySelector(".l").textContent=label;
+    tiles.appendChild(d);
+  });
+
+  const box=document.getElementById("now-groups");box.innerHTML="";
+  const group=(title,list,build)=>{
+    if(!list.length)return;
+    const g=document.createElement("div");g.className="group";
+    const h=document.createElement("h3");h.textContent=title+" ("+list.length+")";
+    const ul=document.createElement("ul");ul.className="people";
+    list.sort((a,b)=>a.name.localeCompare(b.name)).forEach(m=>ul.appendChild(build(m)));
+    g.append(h,ul);box.appendChild(g);
+  };
+
+  group("Ready to go",ready,m=>personRow(m));
+  group("In hospital",hosp,m=>{
+    const t=document.createElement("span");t.className="timer";
+    t.dataset.until=m.until;t.textContent=m.until?countdown(m.until):"";
+    return personRow(m,t);
+  });
+  group("Abroad or flying",away,m=>{
+    const w=document.createElement("span");w.className="where";
+    w.textContent=(m.description||m.state)+(m.since?" \u00b7 "+ago(m.since):"");
+    return personRow(m,w);
+  });
+  group("In jail",jail,m=>personRow(m));
+  group("Offline",idleOk,m=>{const li=personRow(m);li.className="dim";return li;});
+
+  document.getElementById("now-updated").textContent=
+    liveData.error?("Torn says: "+liveData.error)
+    :liveData.updated?("Last checked "+ago(new Date(liveData.updated).getTime())+"."):"";
+}
+
+setInterval(()=>{
+  document.querySelectorAll(".timer[data-until]").forEach(t=>{
+    t.textContent=countdown(+t.dataset.until);
+  });
+},1000);
+
+document.getElementById("cal-prev").onclick=()=>{
+  const d=new Date(calMonth);calMonth=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1);renderCalendar();
+};
+document.getElementById("cal-next").onclick=()=>{
+  const d=new Date(calMonth);calMonth=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1);renderCalendar();
+};
+document.getElementById("cal-today").onclick=()=>{
+  const n=new Date();
+  calMonth=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),1);
+  calDay=utcDay(Date.now());renderCalendar();
+};
+
+document.getElementById("show-alt").onclick=()=>{
+  const a=document.getElementById("lb-alt");
+  a.hidden=!a.hidden;
+  document.getElementById("show-alt").textContent=a.hidden?"Other ways in":"Hide";
+};
+document.getElementById("lb-how").onclick=e=>{
+  e.preventDefault();
+  document.getElementById("t-me").click();
+  const d=document.querySelector("#p-me details");
+  if(d){d.open=true;d.scrollIntoView({behavior:"smooth",block:"center"});}
+};
+
+/* ---------- calendar ---------- */
+let calData={entries:[],chain:null},calFilter="all",editingId=null;
+
+const KINDS=[["all","Everything"],["war","Wars"],["chain","Chains"],["event","Events"],["note","Notes"]];
+
+/* How many people's painted hours cover the moment this starts. */
+function coverageAt(ms){
+  if(!members.length)return null;
+  const d=new Date(ms);
+  const slot=((d.getUTCDay()+6)%7)*24+d.getUTCHours();
+  return {on:members.filter(m=>m.tct[slot]).length,of:members.length,slot};
+}
+const fmtWhen=ms=>new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"short",
+  hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(ms))+" TCT";
+const toLocalInput=ms=>{const d=new Date(ms-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,16);};
+
+async function loadCalendar(quiet){
+  if(demo){renderCalendar();return;}
+  try{ calData=await api("calendar"); renderCalendar(); }
+  catch(e){
+    if(e.noServer){enterDemo();return;}
+    console.error("Calendar load failed:",e);
+    const n=document.getElementById("cal-note");
+    n.textContent="Couldn't load the calendar: "+e.message;
+    n.style.color="var(--rose)";
+  }
+}
+
+function renderChain(){
+  const box=document.getElementById("chain-box");if(!box)return;
+  const c=calData.chain;
+  box.innerHTML="";
+  if(!c)return;
+  const d=document.createElement("div");d.className="chain-live";
+  d.innerHTML='<div class="l">Chain running</div><div class="n"></div>'+
+              '<div class="l" style="margin-top:6px">Drops in <span class="t" id="chain-timer"></span>'+
+              (c.modifier>1?' &middot; modifier '+c.modifier:'')+'</div>';
+  d.querySelector(".n").textContent=c.current+(c.max?" / "+c.max:"");
+  box.appendChild(d);
+  const t=document.getElementById("chain-timer");
+  const end=Date.now()+c.timeout*1000;
+  t.dataset.end=end;
+  t.textContent=c.timeout+"s";
+}
+setInterval(()=>{
+  const t=document.getElementById("chain-timer");if(!t||!t.dataset.end)return;
+  const left=Math.max(0,Math.round((+t.dataset.end-Date.now())/1000));
+  t.textContent=left?left+"s":"gone";
+},1000);
+
+let calMonth=null, calDay=null;
+const DAYMS=864e5;
+const utcDay=ms=>{const d=new Date(ms);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());};
+
+/* Entries can span days, so each one is stamped onto every day it touches. */
+function entriesByDay(){
+  const map={};
+  (calData.entries||[])
+    .filter(e=>calFilter==="all"||e.type===calFilter)
+    .forEach(e=>{
+      const first=utcDay(e.startsAt);
+      const last=utcDay(Math.max(e.endsAt||e.startsAt,e.startsAt));
+      for(let d=first;d<=last;d+=DAYMS){
+        /* Show the title on the first day of the run and again at the start of
+           each week, so a long entry reads as one bar rather than the same
+           words repeated across fourteen cells. */
+        const startsWeek=(new Date(d).getUTCDay()+6)%7===0;
+        (map[d]=map[d]||[]).push({e,label:d===first||startsWeek,span:last>first});
+        if(Object.keys(map).length>800)break;      // guard against a silly end date
+      }
+    });
+  return map;
+}
+
+function renderCalendar(){
+  renderChain();
+  const chips=document.getElementById("cal-filters");chips.innerHTML="";
+  KINDS.forEach(([k,label])=>{
+    const b=document.createElement("button");
+    b.className="chip"+(calFilter===k?" on":"");b.textContent=label;
+    b.onclick=()=>{calFilter=k;renderCalendar();};
+    chips.appendChild(b);
+  });
+
+  const today=utcDay(Date.now());
+  if(calMonth===null)calMonth=Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),1);
+  if(calDay===null)calDay=today;
+
+  const md=new Date(calMonth);
+  document.getElementById("cal-month").textContent=
+    new Intl.DateTimeFormat(undefined,{month:"long",year:"numeric",timeZone:"UTC"}).format(md);
+
+  const dow=document.getElementById("cal-dow");
+  if(!dow.children.length)DAYS.forEach(d=>{const x=document.createElement("span");x.textContent=d.slice(0,2);dow.appendChild(x);});
+
+  /* Weeks start Monday, and the grid is built in Torn time so a day here is
+     the same day for everybody. */
+  const firstDow=(new Date(calMonth).getUTCDay()+6)%7;
+  const gridStart=calMonth-firstDow*DAYMS;
+  const byDay=entriesByDay();
+  const grid=document.getElementById("cal-grid");grid.innerHTML="";
+
+  for(let i=0;i<42;i++){
+    const day=gridStart+i*DAYMS;
+    const dd=new Date(day);
+    const cell=document.createElement("div");
+    cell.className="cal-cell"+(dd.getUTCMonth()!==md.getUTCMonth()?" out":"")+
+      (day===today?" today":"")+(day===calDay?" sel":"");
+    cell.tabIndex=0;cell.setAttribute("role","button");
+    cell.setAttribute("aria-label",new Intl.DateTimeFormat(undefined,{dateStyle:"full",timeZone:"UTC"}).format(dd));
+    const num=document.createElement("div");num.className="dnum";num.textContent=dd.getUTCDate();
+    cell.appendChild(num);
+
+    const list=(byDay[day]||[]);
+    list.slice(0,3).forEach(({e,label})=>{
+      const c=document.createElement("span");
+      c.className="cal-chip "+e.type+(label?"":" cont")+(e.finished?" done":"");
+      if(label)c.textContent=e.title;
+      c.title=e.title;
+      cell.appendChild(c);
+    });
+    if(list.length>3){
+      const more=document.createElement("div");more.className="cal-more";
+      more.textContent="+"+(list.length-3)+" more";cell.appendChild(more);
+    }
+    const open=()=>{calDay=day;renderCalendar();
+      document.getElementById("cal-detail").scrollIntoView({behavior:"smooth",block:"nearest"});};
+    cell.onclick=open;
+    cell.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();open();}};
+    grid.appendChild(cell);
+  }
+
+  renderDayDetail((byDay[calDay]||[]).map(x=>x.e));
+  document.getElementById("cal-note").textContent=
+    calData.warError?("Torn wouldn't give us war data: "+calData.warError+". Ranked wars will need adding by hand."):"";
+}
+
+function renderDayDetail(list){
+  const box=document.getElementById("cal-detail");
+  box.innerHTML="";
+  const wrap=document.createElement("div");wrap.className="day-detail";
+  const h=document.createElement("h3");
+  h.textContent=new Intl.DateTimeFormat(undefined,{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}).format(new Date(calDay))+" (Torn time)";
+  wrap.appendChild(h);
+  if(!list.length){
+    const p=document.createElement("p");p.className="hint";p.style.margin="6px 0 0";
+    p.textContent="Nothing on this day.";
+    wrap.appendChild(p);box.appendChild(wrap);return;
+  }
+  const ul=document.createElement("ul");ul.className="cal";
+  const now=Date.now();
+  list.slice().sort((a,b)=>a.startsAt-b.startsAt).forEach(e=>{
+    const li=document.createElement("li");
+    const top=document.createElement("div");top.className="top";
+    const kind=document.createElement("span");kind.className="kind "+e.type;kind.textContent=e.type;
+    const ttl=document.createElement("span");ttl.className="ttl";ttl.textContent=e.title;
+    top.append(kind,ttl);
+    if(e.source==="torn"){const sc=document.createElement("span");sc.className="src";sc.textContent="from Torn";top.appendChild(sc);}
+    const cov=e.finished?null:coverageAt(e.startsAt);
+    if(cov){
+      const c=document.createElement("span");c.className="cov";
+      c.textContent=cov.on+" of "+cov.of+" free";
+      c.title="People whose hours cover "+fmtWhen(e.startsAt);
+      top.appendChild(c);
+    }
+    li.appendChild(top);
+    if(e.finished)li.style.opacity=".62";
+    const when=document.createElement("div");when.className="when";
+    const multi=utcDay(e.endsAt||e.startsAt)>utcDay(e.startsAt);
+    const short=ms=>new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(ms));
+    const rel=e.finished?"finished "+Math.max(1,Math.round((now-e.endsAt)/36e5))+"h ago"
+      :e.startsAt>now?"starts in "+Math.max(1,Math.round((e.startsAt-now)/36e5))+"h"
+      :(e.endsAt>now?"under way":"over");
+    when.textContent=(multi ? "Runs "+short(e.startsAt)+" to "+short(e.endsAt)
+                            : fmtWhen(e.startsAt))+"  ("+rel+")";
+    li.appendChild(when);
+    if(e.body){const p=document.createElement("p");p.className="note";p.textContent=e.body;li.appendChild(p);}
+    if(!e.finished)li.appendChild(rsvpBlock(e));
+    if(isAdmin&&e.source==="manual"){
+      const acts=document.createElement("div");acts.className="acts";
+      const ed=document.createElement("button");ed.className="quiet";ed.textContent="Edit";
+      ed.onclick=()=>startEdit(e);
+      const del=document.createElement("button");del.className="quiet";del.textContent="Delete";
+      del.onclick=async()=>{
+        if(!confirm("Delete "+e.title+"?"))return;
+        try{await api("calendar/delete",{id:e.id});await loadCalendar();}catch(err){alert(err.message);}
+      };
+      acts.append(ed,del);li.appendChild(acts);
+    }
+    ul.appendChild(li);
+  });
+  wrap.appendChild(ul);box.appendChild(wrap);
+}
+
+/* Who is actually turning up, as opposed to who merely could. */
+function rsvpBlock(e){
+  const wrap=document.createElement("div");wrap.className="rsvp";
+  const list=e.rsvps||[];
+  const mine=list.find(r=>r.id===me.id);
+  const pick=st=>list.filter(r=>r.status===st);
+
+  const bar=document.createElement("div");bar.className="rsvp-bar";
+  const sum=document.createElement("span");sum.className="rsvp-sum";
+  sum.textContent=list.length
+    ? pick("in").length+" in, "+pick("maybe").length+" maybe, "+pick("out").length+" out"
+    : "Nobody has answered yet.";
+  bar.appendChild(sum);
+
+  if(!demo&&me.id){
+    const btns=document.createElement("div");btns.className="rsvp-btns";
+    [["in","I'm in","coming to"],["maybe","Maybe","a maybe for"],["out","Can't","unable to make"]]
+      .forEach(([st,label,phrase])=>{
+        const b=document.createElement("button");
+        b.className=st+(mine&&mine.status===st?" on":"");
+        b.textContent=label;
+        b.onclick=async()=>{
+          const same=mine&&mine.status===st;
+          const q=same ? "Remove your answer for \""+e.title+"\"?"
+                       : "Mark yourself as "+phrase+" \""+e.title+"\"?";
+          if(!confirm(q))return;
+          try{
+            await api("calendar/rsvp",{id:e.id,status:same?null:st});
+            await loadCalendar();
+          }catch(err){alert(err.message);}
+        };
+        btns.appendChild(b);
+      });
+    bar.appendChild(btns);
+  }
+  wrap.appendChild(bar);
+
+  if(list.length){
+    const groups=document.createElement("div");groups.className="rsvp-groups";
+    [["in","In"],["maybe","Maybe"],["out","Out"]].forEach(([st,label])=>{
+      const people=pick(st);
+      if(!people.length)return;
+      const row=document.createElement("div");row.className="rsvp-row";
+      const pip=document.createElement("span");pip.className="pip "+st;
+      const lab=document.createElement("span");lab.className="rlab";
+      lab.textContent=label+" ("+people.length+")";
+      const names=document.createElement("span");names.className="rnames";
+      people.sort((a,b)=>a.name.localeCompare(b.name)).forEach((r,i)=>{
+        if(i)names.appendChild(document.createTextNode(", "));
+        names.appendChild(nameLink(r.name,r.id));
+      });
+      row.append(pip,lab,names);
+      groups.appendChild(row);
+    });
+    wrap.appendChild(groups);
+  }
+  return wrap;
+}
+
+function startEdit(e){
+  editingId=e.id;
+  document.getElementById("ce-title").value=e.title;
+  document.getElementById("ce-type").value=e.type;
+  document.getElementById("ce-start").value=toLocalInput(e.startsAt);
+  document.getElementById("ce-end").value=e.endsAt?toLocalInput(e.endsAt):"";
+  document.getElementById("ce-body").value=e.body||"";
+  document.getElementById("cal-form-title").textContent="Editing: "+e.title;
+  document.getElementById("ce-cancel").hidden=false;
+  document.getElementById("ce-title").focus();
+}
+function resetEdit(){
+  editingId=null;
+  ["ce-title","ce-start","ce-end","ce-body"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cal-form-title").textContent="Add something to the calendar";
+  document.getElementById("ce-cancel").hidden=true;
+}
+
+/* ---------- playbook ---------- */
+let docsData=[],docKey="";
+
+/* Bodies are stored as plain text and escaped before any formatting is applied,
+   so an admin account being taken over can't put script into everyone's page. */
+function renderMarkdown(src){
+  const esc=String(src).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const inline=t=>t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+                   .replace(/`([^`]+)`/g,"<code>$1</code>")
+                   .replace(/\*([^*]+)\*/g,"<em>$1</em>");
+  const out=[];let list=null;
+  esc.split(/\r?\n/).forEach(line=>{
+    const h=line.match(/^(#{1,3})\s+(.*)$/);
+    const b=line.match(/^[-*]\s+(.*)$/);
+    if(b){ list=list||[]; list.push("<li>"+inline(b[1])+"</li>"); return; }
+    if(list){ out.push("<ul>"+list.join("")+"</ul>"); list=null; }
+    if(h){ out.push("<h"+h[1].length+">"+inline(h[2])+"</h"+h[1].length+">"); return; }
+    if(line.trim()) out.push("<p>"+inline(line)+"</p>");
+  });
+  if(list) out.push("<ul>"+list.join("")+"</ul>");
+  return out.join("");
+}
+
+async function loadDocs(quiet){
+  if(demo){docsData=[{key:"strategy",title:"Our strategies",body:"# Sample page\nThis is demo text, not your faction's actual plans.\n\n- Admins can edit these pages\n- Members can read them",updatedAt:Date.now(),updatedBy:"demo"}];docKey="strategy";renderDocs();return;}
+  try{ const d=await api("docs"); docsData=d.docs||[]; if(!docKey&&docsData[0])docKey=docsData[0].key; renderDocs(); }
+  catch(e){ if(e.noServer){enterDemo();return;}
+    if(!quiet)document.getElementById("doc-msg").textContent=e.message; }
+}
+
+function renderDocs(){
+  const tabs=document.getElementById("doc-tabs");tabs.innerHTML="";
+  docsData.forEach(d=>{
+    const b=document.createElement("button");
+    b.className="chip"+(d.key===docKey?" on":"");b.textContent=d.title;
+    b.onclick=()=>{docKey=d.key;document.getElementById("doc-editor").hidden=true;renderDocs();};
+    tabs.appendChild(b);
+  });
+  const doc=docsData.find(d=>d.key===docKey);
+  const view=document.getElementById("doc-view");
+  view.innerHTML="";
+  if(!doc)return;
+  const body=document.createElement("div");body.className="doc";
+  body.innerHTML=renderMarkdown(doc.body||"");
+  view.appendChild(body);
+  if(doc.updatedAt){
+    const m=document.createElement("div");m.className="doc-meta";
+    m.textContent="Last edited by "+(doc.updatedBy||"someone")+" on "+
+      new Intl.DateTimeFormat(undefined,{day:"numeric",month:"long",year:"numeric"}).format(new Date(doc.updatedAt));
+    view.appendChild(m);
+  }
+}
+
+document.getElementById("ce-save").onclick=async()=>{
+  const msg=document.getElementById("ce-msg");
+  const title=document.getElementById("ce-title").value.trim();
+  const start=document.getElementById("ce-start").value;
+  const end=document.getElementById("ce-end").value;
+  if(!title){note(msg,"Give it a title.",true);return;}
+  if(!start){note(msg,"Give it a start time.",true);return;}
+  try{
+    await api("calendar",{
+      id:editingId||undefined,
+      type:document.getElementById("ce-type").value,
+      title,
+      startsAt:new Date(start).getTime(),
+      endsAt:end?new Date(end).getTime():0,
+      body:document.getElementById("ce-body").value
+    });
+    resetEdit();note(msg,"Saved.");
+    await loadCalendar();
+  }catch(e){note(msg,e.message,true);}
+};
+document.getElementById("ce-cancel").onclick=()=>resetEdit();
+
+document.getElementById("doc-edit").onclick=()=>{
+  const doc=docsData.find(d=>d.key===docKey);if(!doc)return;
+  document.getElementById("doc-title").value=doc.title||"";
+  document.getElementById("doc-body").value=doc.body||"";
+  document.getElementById("doc-editor").hidden=false;
+};
+document.getElementById("doc-cancel").onclick=()=>{document.getElementById("doc-editor").hidden=true;};
+document.getElementById("doc-save").onclick=async()=>{
+  const msg=document.getElementById("doc-msg");
+  try{
+    await api("docs",{key:docKey,
+      title:document.getElementById("doc-title").value,
+      body:document.getElementById("doc-body").value});
+    document.getElementById("doc-editor").hidden=true;
+    note(msg,"Page saved.");
+    await loadDocs();
+  }catch(e){note(msg,e.message,true);}
+};
+
+let editingEvent=null;
+function startEventEdit(e){
+  editingEvent=e.id;
+  document.getElementById("ae-name").value=e.n||e.name||"";
+  document.getElementById("ae-rule").value=e.rule||"fixed";
+  document.getElementById("ae-month").value=e.month||"";
+  document.getElementById("ae-day").value=e.day||"";
+  document.getElementById("ae-days").value=e.days||1;
+  document.getElementById("ae-sure").value=e.sure===false?"0":"1";
+  document.getElementById("ae-what").value=e.what||"";
+  document.getElementById("ae-tip").value=e.tip||"";
+  document.getElementById("ev-form-title").textContent="Editing: "+(e.n||e.name);
+  document.getElementById("ae-cancel").hidden=false;
+  document.getElementById("ev-admin").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function resetEventEdit(){
+  editingEvent=null;
+  ["ae-name","ae-month","ae-day","ae-what","ae-tip"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("ae-days").value=1;
+  document.getElementById("ev-form-title").textContent="Add an event";
+  document.getElementById("ae-cancel").hidden=true;
+}
+document.getElementById("ae-cancel").onclick=()=>resetEventEdit();
+document.getElementById("ae-save").onclick=async()=>{
+  const msg=document.getElementById("ae-msg");
+  const name=document.getElementById("ae-name").value.trim();
+  if(!name){note(msg,"Give it a name.",true);return;}
+  try{
+    await api("annual",{
+      id:editingEvent||undefined,name,
+      rule:document.getElementById("ae-rule").value,
+      month:+document.getElementById("ae-month").value||1,
+      day:+document.getElementById("ae-day").value||1,
+      days:+document.getElementById("ae-days").value||1,
+      sure:document.getElementById("ae-sure").value==="1",
+      what:document.getElementById("ae-what").value,
+      tip:document.getElementById("ae-tip").value
+    });
+    resetEventEdit();note(msg,"Saved.");
+    await loadAnnual();
+  }catch(e){note(msg,e.message,true);}
+};
+
+document.getElementById("doc-new").onclick=()=>{
+  const title=prompt("What should the new page be called?");
+  if(!title)return;
+  const key=title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40);
+  if(!key){alert("That name won't work. Try letters and numbers.");return;}
+  docKey=key;
+  docsData.push({key,title,body:"",updatedAt:null,updatedBy:""});
+  renderDocs();
+  document.getElementById("doc-title").value=title;
+  document.getElementById("doc-body").value="";
+  document.getElementById("doc-editor").hidden=false;
+};
+document.getElementById("doc-delete").onclick=async()=>{
+  const doc=docsData.find(d=>d.key===docKey);if(!doc)return;
+  if(!confirm("Delete the page \""+doc.title+"\"? This can't be undone."))return;
+  try{
+    await api("docs/delete",{key:docKey});
+    docKey="";document.getElementById("doc-editor").hidden=true;
+    await loadDocs();
+  }catch(e){note(document.getElementById("doc-msg"),e.message,true);}
+};
+
+/* ---------- respect run ---------- */
+let nflData={rows:[],slaps:[]};
+
+/* Kept here as well as on the server so the page still reads properly if the
+   two ever drift out of step. */
+const TEAM_NAMES={
+ ARI:"Arizona Cardinals", ATL:"Atlanta Falcons", BAL:"Baltimore Ravens", BUF:"Buffalo Bills",
+ CAR:"Carolina Panthers", CHI:"Chicago Bears", CIN:"Cincinnati Bengals", CLE:"Cleveland Browns",
+ DAL:"Dallas Cowboys", DEN:"Denver Broncos", DET:"Detroit Lions", GB:"Green Bay Packers",
+ HOU:"Houston Texans", IND:"Indianapolis Colts", JAX:"Jacksonville Jaguars", JAC:"Jacksonville Jaguars",
+ KC:"Kansas City Chiefs", LV:"Las Vegas Raiders", LAC:"Los Angeles Chargers", LAR:"Los Angeles Rams",
+ LA:"Los Angeles Rams", MIA:"Miami Dolphins", MIN:"Minnesota Vikings", NE:"New England Patriots",
+ NO:"New Orleans Saints", NYG:"New York Giants", NYJ:"New York Jets", PHI:"Philadelphia Eagles",
+ PIT:"Pittsburgh Steelers", SF:"San Francisco 49ers", SEA:"Seattle Seahawks", TB:"Tampa Bay Buccaneers",
+ TEN:"Tennessee Titans", WAS:"Washington Commanders", WSH:"Washington Commanders"
+};
+/* ESPN's logo slugs are the lowercase abbreviation, bar a couple of oddities.
+   Having this client side means logos work in the archive and season tables,
+   which only carry an abbreviation. */
+const LOGO_SLUG={WAS:"wsh",WSH:"wsh",JAC:"jax",JAX:"jax",LA:"lar",LAR:"lar"};
+function teamLogo(abbr,given){
+  if(given)return given;
+  const a=String(abbr||"").toUpperCase();
+  if(!a)return "";
+  return "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/"+(LOGO_SLUG[a]||a.toLowerCase())+".png";
+}
+function logoEl(abbr,given,cls){
+  const src=teamLogo(abbr,given);
+  const im=document.createElement("img");
+  im.className="tlogo"+(cls?" "+cls:"");im.src=src;im.alt="";im.loading="lazy";
+  im.onerror=()=>im.remove();
+  return im;
+}
+const fullTeam=(abbr,given)=>(given&&given!==abbr)?given:(TEAM_NAMES[String(abbr||"").toUpperCase()]||abbr||"");
+
+const DEMO_NFL={week:1,season:2026,hitsRequired:4,
+  rows:[{team:"NE",name:"VAPOR32",id:0,lost:true,score:"10-13",opponent:"SEA",done:true,owes:4,hits:1,deadline:Date.now()+8*36e5,start:Date.now()-2*864e5},
+        {team:"SEA",name:"spaghettiBob",id:0,lost:false,score:"13-10",opponent:"NE",done:true,owes:0,hits:0},
+        {team:"KC",name:"RivenProtocol",id:0,lost:null,score:"",opponent:"DEN",done:false,chance:0.71},
+        {team:"MIN",name:"",id:0,bye:true,played:false}],
+  slaps:[{a:{name:"VAPOR32",team:"NE",lost:true,done:true},b:{name:"spaghettiBob",team:"SEA",lost:false,done:true}}]};
+
+async function loadNfl(quiet){
+  if(demo){nflData=DEMO_NFL;renderNfl();loadHistory();return;}
+  try{ nflData=await api("nfl"); renderNfl(); loadHistory(); }
+  catch(e){
+    if(e.noServer){enterDemo();return;}
+    /* Always shown. A quiet failure leaves an empty page and no clue why,
+       which is worse than a line of red text. */
+    console.error("NFL load failed:",e);
+    const n=document.getElementById("nfl-note");
+    n.textContent="Couldn't load the NFL board: "+e.message;
+    n.style.color="var(--rose)";
+  }
+}
+
+function hitBoxes(row){
+  const wrap=document.createElement("div");wrap.className="hitrow";
+  const need=nflData.hitsRequired||4;
+  for(let i=1;i<=need;i++){
+    const b=document.createElement("button");
+    b.textContent=i<=row.hits?"\u2713":i;
+    b.className=i<=row.hits?"done":"";
+    b.title=i<=row.hits?"Click to set your total back to "+(i-1):"Mark "+i+" hits done";
+    b.onclick=async()=>{
+      if(demo)return;
+      const next=i===row.hits?i-1:i;    // clicking your current total steps back one
+      try{ await api("nfl/hits",{hits:next}); await loadNfl(); }
+      catch(err){alert(err.message);}
+    };
+    wrap.appendChild(b);
+  }
+  const lab=document.createElement("span");lab.style.color="var(--dim)";lab.style.fontSize="13px";
+  lab.textContent=row.hits>=need?"All done. Nothing owed.":row.hits+" of "+need+" done";
+  wrap.appendChild(lab);
+  return wrap;
+}
+
+/* Either party, or an admin, can confirm the slapping took place. */
+function slapMark(a,b){
+  const pair=(nflData.slaps||[]).find(s=>s.a===a&&s.b===b)||{};
+  const row=document.createElement("div");row.className="slapmark";
+  if(pair.slapped){
+    const t=document.createElement("span");t.className="slapped";
+    t.textContent="Slapped, confirmed by "+(pair.slapped.by||"someone");
+    row.appendChild(t);
+  }
+  const involved=[a,b].some(p=>(p.id&&p.id===me.id)||
+    (whoami&&p.name&&p.name.toLowerCase()===whoami.toLowerCase()));
+  if((involved||isAdmin)&&!demo&&pair.key){
+    const btn=document.createElement("button");
+    btn.className="quiet";btn.style.padding="3px 10px";btn.style.fontSize="12px";
+    btn.textContent=pair.slapped?"Undo":"Mark as slapped";
+    btn.onclick=async()=>{
+      try{ await api("nfl/slap",{key:pair.key,done:!pair.slapped}); await loadNfl(); }
+      catch(e){alert(e.message);}
+    };
+    row.appendChild(btn);
+  }
+  return row;
+}
+
+function renderNfl(){
+  try{ renderNflInner(); }
+  catch(err){
+    console.error("renderNfl failed:",err);
+    const n=document.getElementById("nfl-note");
+    if(n){n.textContent="Something went wrong drawing this page: "+err.message;n.style.color="var(--rose)";}
+  }
+}
+
+/* Copies the column headings onto each cell, so the mobile card layout can
+   print them as labels. */
+function labelTable(t){
+  const heads=[...t.querySelectorAll("thead th")].map(th=>(th.textContent||"").trim());
+  t.querySelectorAll("tbody tr").forEach(tr=>{
+    [...tr.children].forEach((td,i)=>{
+      if(td.colSpan&&td.colSpan>1)return;
+      if(heads[i])td.setAttribute("data-l",heads[i]);
+    });
+  });
+}
+
+function renderNflInner(){
+  document.getElementById("nfl-week").textContent=
+    nflData.week?("NFL Run \u2014 week "+nflData.week):"NFL Run";
+
+  /* Your own situation first, because that's what everyone came to check. */
+  const youBox=document.getElementById("nfl-you");youBox.innerHTML="";
+  const mine=(nflData.rows||[]).find(r=>(r.id&&r.id===me.id)||
+    (whoami&&r.name&&r.name.toLowerCase()===whoami.toLowerCase()));
+  if(mine){
+    const c=document.createElement("div");
+    c.className="you-card"+(mine.lost===true?" lost":mine.lost===false?" won":"");
+    const h=document.createElement("h3");h.className="tmcell";
+    h.appendChild(logoEl(mine.team,mine.logo,"big"));
+    h.appendChild(document.createTextNode(fullTeam(mine.team,mine.teamName)));
+    if(mine.opponent){
+      const vs=document.createElement("span");vs.className="vs";vs.textContent="v";
+      h.appendChild(vs);
+      h.appendChild(logoEl(mine.opponent,mine.opponentLogo,"big"));
+      h.appendChild(document.createTextNode(fullTeam(mine.opponent,mine.opponentName)));
+    }
+    c.appendChild(h);
+    const big=document.createElement("div");big.className="big";
+    const sub=document.createElement("div");sub.className="sub";
+    if(mine.bye){ big.textContent="Bye week"; sub.textContent="No game, nothing owed. Enjoy it."; }
+    else if(mine.lost===true&&mine.owes===0){
+      big.textContent="You lost, but you're off the hook";
+      sub.textContent="Lost "+mine.score+" to "+mine.opponent+", but that game finished before the event started.";
+    }
+    else if(mine.lost===true){
+      big.textContent="You owe "+mine.owes+" hits";
+      sub.textContent="Lost "+mine.score+" to "+mine.opponent+". Due by "+
+        new Intl.DateTimeFormat(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(mine.deadline))+" TCT.";
+    }
+    else if(mine.lost===false){ big.textContent="You're safe"; sub.textContent="Won "+mine.score+" against "+mine.opponent+"."; }
+    else {
+      big.textContent="Not played yet";
+      const kick=mine.start?new Intl.DateTimeFormat(undefined,{weekday:"short",hour:"2-digit",
+        minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(mine.start))+" TCT":"soon";
+      sub.textContent="Kicks off "+kick+"."+
+        (mine.favourite===true?" Bookies have you as favourite."
+        :mine.favourite===false?" Bookies have you as the underdog. Start warming up."
+        :"");
+    }
+    c.append(big,sub);
+    if(mine.lost===null&&!mine.bye){
+      const bet=document.createElement("div");bet.className="betline";
+      bet.innerHTML='Faction rule: put a $10 bet on your game at the '+
+        '<a href="https://www.torn.com/bookie.php" target="_blank" rel="noopener">bookies</a>'+
+        ' so you find out the proper way.';
+      c.appendChild(bet);
+    }
+    if(mine.owes>0)c.appendChild(hitBoxes(mine));
+    youBox.appendChild(c);
+  }
+
+  const slapBox=document.getElementById("nfl-slaps");slapBox.innerHTML="";
+  if((nflData.slaps||[]).length){
+    const h=document.createElement("h3");h.className="nfl-h3";
+    h.textContent="Trout Slap";slapBox.appendChild(h);
+    const p=document.createElement("p");p.className="hint";
+    p.textContent=nflData.slaps.length===1
+      ? "Two of ours are drawn against each other this week, so normal rules are off."
+      : nflData.slaps.length+" fixtures this week put two of ours against each other, so normal rules are off.";
+    slapBox.appendChild(p);
+    nflData.slaps.forEach(({a,b})=>{
+      const d=document.createElement("div");d.className="slap";
+      const decided=a.done||b.done;
+      if(decided){
+        const w=a.lost===false?a:b, l=a.lost===true?a:b;
+        const line=document.createElement("div");line.className="slapline";
+        const wn=document.createElement("span");wn.className="wn tmcell";
+        wn.appendChild(logoEl(w.team,w.logo,"sm"));
+        wn.appendChild(document.createTextNode(w.name+" ("+w.team+")"));
+        const sc=document.createElement("span");sc.className="sc";sc.textContent=w.score||"";
+        const ln=document.createElement("span");ln.className="ln tmcell";
+        ln.appendChild(logoEl(l.team,l.logo,"sm"));
+        ln.appendChild(document.createTextNode(l.name+" ("+l.team+")"));
+        line.append(wn,sc,ln);
+        d.appendChild(line);
+        d.appendChild(slapMark(a,b));
+      }else{
+        const line=document.createElement("div");line.className="slapline";
+        const an=document.createElement("span");an.className="wn tmcell";
+        an.appendChild(logoEl(a.team,a.logo,"sm"));
+        an.appendChild(document.createTextNode(a.name+" ("+a.team+")"));
+        const sc=document.createElement("span");sc.className="sc pending";sc.textContent="v";
+        const bn=document.createElement("span");bn.className="wn tmcell";
+        bn.appendChild(logoEl(b.team,b.logo,"sm"));
+        bn.appendChild(document.createTextNode(b.name+" ("+b.team+")"));
+        line.append(an,sc,bn);
+        d.appendChild(line);
+        const when=document.createElement("div");when.className="slapwhen";
+        when.textContent=a.start
+          ? "Kicks off "+new Intl.DateTimeFormat(undefined,{weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(a.start))+" TCT"
+          : "Not played yet";
+        d.appendChild(when);
+        d.appendChild(slapMark(a,b));
+      }
+      slapBox.appendChild(d);
+    });
+  }
+
+  /* Summary first: the three numbers people actually want. */
+  const rowsAll=(nflData.rows||[]).filter(r=>r.name);
+  const tiles=document.getElementById("nfl-tiles");tiles.innerHTML="";
+  [["hosp",rowsAll.filter(r=>r.owes>0).length,"owe hits"],
+   ["ok",rowsAll.filter(r=>r.lost===false).length,"safe this week"],
+   ["trav",rowsAll.filter(r=>r.lost===null&&!r.bye).length,"still to play"],
+   ["",(nflData.slaps||[]).length,"trout slaps"]].forEach(([cls,n,label])=>{
+    const d=document.createElement("div");d.className="tile"+(cls?" "+cls:"");
+    d.innerHTML='<div class="n"></div><div class="l"></div>';
+    d.querySelector(".n").textContent=n;d.querySelector(".l").textContent=label;
+    tiles.appendChild(d);
+  });
+
+  const box=document.getElementById("nfl-board");box.innerHTML="";
+  const t=document.createElement("table");t.className="nfl-table";
+  t.innerHTML="<thead><tr><th>Team</th><th>Member</th><th>Fixture</th><th>Result</th><th>Owed</th><th>Hits</th></tr></thead>";
+  const tb=document.createElement("tbody");
+  const fmtKick=ms=>new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"short",
+    hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(ms))+" TCT";
+  rowsAll.slice().sort((a,b)=>{
+    const rank=r=>r.lost===true?0:r.lost===null?1:2;
+    return rank(a)-rank(b)||(a.name||"zz").localeCompare(b.name||"zz");
+  }).forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.className="head"+(r.lost===true?" lost":"");
+    if(r.colour)tr.style.boxShadow="inset 3px 0 0 "+r.colour;
+    const cell=(txt,cls)=>{const td=document.createElement("td");if(cls)td.className=cls;
+      if(typeof txt==="string")td.textContent=txt;else td.appendChild(txt);return td;};
+
+    const tmWrap=document.createElement("span");tmWrap.className="tmcell";
+    tmWrap.appendChild(logoEl(r.team,r.logo));
+    const tm=document.createElement("span");tm.className="tmfull";tm.textContent=fullTeam(r.team,r.teamName);
+    const ab=document.createElement("span");ab.className="abbr";ab.textContent=r.team;
+    tmWrap.append(tm,ab);
+    tmWrap.title=fullTeam(r.team,r.teamName);
+    tr.appendChild(cell(tmWrap));
+    tr.appendChild(cell(nameLink(r.name,r.id)));
+    const fix=document.createElement("span");
+    fix.className="tmcell";
+    if(!r.bye&&r.opponent){
+      const v=document.createElement("span");v.style.color="var(--dim)";v.textContent="v";
+      fix.append(v,logoEl(r.opponent,r.opponentLogo,"sm"),document.createTextNode(r.opponent));
+    }else fix.textContent=r.bye?"bye":"-";
+    fix.title=fullTeam(r.opponent,r.opponentName)+(r.opponentRecord?" ("+r.opponentRecord+")":"");
+    tr.appendChild(cell(fix));
+    if(r.live){
+      const lv=document.createElement("span");lv.className="livecell";
+      const dot=document.createElement("span");dot.className="live-dot";
+      lv.appendChild(dot);
+      lv.appendChild(document.createTextNode(r.liveScore+"  "+(r.statusDetail||"live")));
+      tr.appendChild(cell(lv,"res"));
+    }else{
+      tr.appendChild(cell(r.score||(r.bye?"-":r.state==="post"?"":(r.statusDetail||"not played")),"res"));
+    }
+    const owedTxt = r.bye ? "-"
+      : r.lost===true ? (r.owes>0 ? r.owes+" hits" : "before the event")
+      : r.lost===false ? "safe" : "pending";
+    tr.appendChild(cell(owedTxt, r.owes>0?"owe":r.lost===false?"safe":"pend"));
+    const need=nflData.hitsRequired||4;
+    const mineRow=(r.id&&r.id===me.id)||(whoami&&r.name&&r.name.toLowerCase()===whoami.toLowerCase());
+    if(r.owes>0&&(isAdmin||mineRow)&&!demo){
+      const td=document.createElement("td");
+      const wrap=document.createElement("span");
+      wrap.style.display="flex";wrap.style.gap="8px";wrap.style.alignItems="center";
+      const lab=document.createElement("span");lab.textContent=r.hits+"/"+need;
+      const b=document.createElement("button");
+      b.className="quiet";b.style.padding="3px 10px";b.style.fontSize="12px";
+      b.textContent=r.hits>=need?"Undo":"Mark done";
+      b.title=r.hits>=need?"Set back to nothing done":"Mark all "+need+" hits as done";
+      b.onclick=async ev=>{
+        ev.stopPropagation();
+        try{ await api("nfl/hits",{who:String(r.id||r.name),hits:r.hits>=need?0:need}); await loadNfl(); }
+        catch(err){alert(err.message);}
+      };
+      wrap.append(lab,b);td.appendChild(wrap);tr.appendChild(td);
+    }else{
+      tr.appendChild(cell(r.owes>0?(r.hits+"/"+need):""));
+    }
+    tb.appendChild(tr);
+
+    const drow=document.createElement("tr");
+    const dcell=document.createElement("td");dcell.className="detail";dcell.colSpan=6;
+    const d=document.createElement("div");d.className="nfl-detail";
+    const bit=(label,val)=>{const e=document.createElement("div");
+      e.innerHTML="<span>"+label+"</span> ";
+      const b=document.createElement("b");b.textContent=val;e.appendChild(b);return e;};
+    d.appendChild(bit("Team",fullTeam(r.team,r.teamName)+(r.record?"  "+r.record:"")));
+    if(r.bye)d.appendChild(bit("This week","Bye, no game"));
+    else{
+      d.appendChild(bit("Opponent",fullTeam(r.opponent,r.opponentName)+(r.opponentRecord?"  "+r.opponentRecord:"")));
+      if(r.start)d.appendChild(bit("Kickoff",fmtKick(r.start)));
+      if(r.venue)d.appendChild(bit("Venue",r.venue+(r.city?", "+r.city:"")+(r.neutral?"  (neutral)":"")));
+      if(r.broadcast)d.appendChild(bit("On",r.broadcast));
+      if(r.weather&&r.weather.summary)
+        d.appendChild(bit("Weather",r.weather.summary+(r.weather.temp?", "+r.weather.temp+"\u00b0F":"")));
+      /* The bookies line, which is the rule-2 bet in a nutshell. */
+      if(r.odds&&r.odds.line){
+        d.appendChild(bit("Line",r.odds.line+(r.odds.total?"  o/u "+r.odds.total:"")));
+        d.appendChild(bit("Bookies reckon",r.favourite?"you're favourite":"you're the underdog"));
+      }
+      if(r.live)d.appendChild(bit("Live",r.liveScore+"  "+(r.statusDetail||"")));
+      if(r.score)d.appendChild(bit("Final score",r.score+(r.statusDetail&&r.statusDetail!=="Final"?"  "+r.statusDetail:"")));
+      if(r.quarters&&r.quarters.length){
+        const mine=r.quarters.join(" "), theirs=(r.opponentQuarters||[]).join(" ");
+        d.appendChild(bit("By quarter",r.team+" "+mine+"   |   "+r.opponent+" "+theirs));
+      }
+      if(r.lost===true&&r.owes===0)d.appendChild(bit("Counts towards the event","No, played before it started"));
+      if(r.owes>0){
+        d.appendChild(bit("Deadline",fmtKick(r.deadline)));
+        const left=r.deadline-Date.now();
+        d.appendChild(bit("Time left",left>0?Math.floor(left/36e5)+"h "+Math.floor(left%36e5/6e4)+"m":"passed"));
+        d.appendChild(bit("Hits done",r.hits+" of "+(nflData.hitsRequired||4)));
+        const meta=r.hitMeta||{};
+        if(meta.at){
+          const late=meta.at>r.deadline;
+          const when=new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"short",
+            hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"}).format(new Date(meta.at));
+          const e=bit("Recorded",when+" TCT"+(meta.by?" by "+meta.by:""));
+          if(late){const w=document.createElement("b");w.style.color="var(--rose)";
+            w.textContent="  after the deadline";e.appendChild(w);}
+          d.appendChild(e);
+        }
+      }
+      if(r.attendance)d.appendChild(bit("Crowd",r.attendance.toLocaleString()));
+      (r.leaders||[]).forEach(l=>d.appendChild(bit(l.what,l.who+" - "+l.line)));
+    }
+    dcell.appendChild(d);
+
+    /* Recap headline and a link through to the full game, outside the grid. */
+    if(r.headline||r.gamecast){
+      const extra=document.createElement("div");extra.style.marginTop="8px";
+      if(r.headline){const h=document.createElement("div");h.className="recap";h.textContent=r.headline;extra.appendChild(h);}
+      const linkRow=document.createElement("div");linkRow.style.marginTop="6px";
+      linkRow.style.display="flex";linkRow.style.gap="14px";linkRow.style.flexWrap="wrap";
+      [[r.gamecast,"Full game"],[r.highlights,"Highlights"],[r.boxscore,"Box score"]]
+        .forEach(([href,label])=>{
+          if(!href)return;
+          const a=document.createElement("a");a.className="gclink";a.href=href;
+          a.target="_blank";a.rel="noopener";a.textContent=label;
+          linkRow.appendChild(a);
+        });
+      if(linkRow.children.length)extra.appendChild(linkRow);
+      dcell.appendChild(extra);
+    }
+    drow.appendChild(dcell);drow.hidden=true;
+    tb.appendChild(drow);
+    tr.onclick=()=>{drow.hidden=!drow.hidden;};
+  });
+  t.appendChild(tb);labelTable(t);box.appendChild(t);
+
+  /* Forfeits: deadline gone, hits still owed. */
+  const fbox=document.getElementById("nfl-forfeits");fbox.innerHTML="";
+  const ff=nflData.forfeits||[];
+  if(ff.length){
+    const d=document.createElement("div");d.className="forfeit";
+    const h=document.createElement("h3");
+    h.textContent="Up for a pillowing \u2014 "+ff.length;
+    const p=document.createElement("p");p.className="hint";p.style.margin="0";
+    const who=(nflData.enforcers||[]).join(" or ");
+    p.textContent="Deadline gone, hits still owed. "+(who?who+" may now proceed.":"The forfeit applies.");
+    const ul=document.createElement("ul");
+    ff.forEach(f=>{
+      const li=document.createElement("li");
+      li.appendChild(nameLink(f.name,f.id));
+      const sp=document.createElement("span");sp.className="short";
+      sp.textContent="  "+f.short+" hit"+(f.short===1?"":"s")+" short";
+      const tm=document.createElement("span");tm.style.color="var(--dim)";
+      tm.textContent="  ("+fullTeam(f.team,f.teamName)+")";
+      li.append(sp,tm);ul.appendChild(li);
+    });
+    d.append(h,p,ul);fbox.appendChild(d);
+  }
+
+  /* Monthly prize. */
+  const mbox=document.getElementById("nfl-monthly");mbox.innerHTML="";
+  const mh=document.getElementById("nfl-month-h");
+  if(nflData.monthLabel&&mh){
+    const [y,m]=nflData.monthLabel.split("-");
+    mh.textContent=new Intl.DateTimeFormat(undefined,{month:"long",year:"numeric",timeZone:"UTC"})
+      .format(new Date(Date.UTC(+y,+m-1,1)))+" prize";
+  }
+  const mt=nflData.monthly||[];
+  if(mt.length){
+    const tab=document.createElement("table");tab.className="nfl-table";
+    tab.innerHTML="<thead><tr><th></th><th>Member</th><th>Team</th><th>Losses</th><th>Hits done</th></tr></thead>";
+    const body=document.createElement("tbody");
+    mt.forEach((r,i)=>{
+      const tr=document.createElement("tr");
+      const c=(txt,cls)=>{const td=document.createElement("td");if(cls)td.className=cls;
+        if(typeof txt==="string")td.textContent=txt;else td.appendChild(txt);return td;};
+      tr.appendChild(c(String(i+1),"rank"+(i===0?" first":"")));
+      tr.appendChild(c(nameLink(r.name,r.id)));
+      const ab=document.createElement("span");ab.textContent=r.team;ab.title=fullTeam(r.team,r.teamName);
+      tr.appendChild(c(ab));
+      tr.appendChild(c(String(r.losses)));
+      tr.appendChild(c(String(r.done)));
+      body.appendChild(tr);
+    });
+    tab.appendChild(body);labelTable(tab);mbox.appendChild(tab);
+  }else{
+    mbox.innerHTML='<p class="hint">Nobody has lost yet this month, so the Xanax stay where they are.</p>';
+  }
+
+  /* Season table. The defaults column is the shame column. */
+  const sbox=document.getElementById("nfl-season");sbox.innerHTML="";
+  const st=(nflData.seasonTable||[]);
+  if(st.length){
+    const tab=document.createElement("table");tab.className="nfl-table season-table";
+    tab.innerHTML="<thead><tr><th>Member</th><th>Team</th><th>Losses</th><th>Hits done</th><th>Owed</th><th>Missed weeks</th></tr></thead>";
+    const body=document.createElement("tbody");
+    st.forEach(r=>{
+      const tr=document.createElement("tr");
+      const c=(txt,cls)=>{const td=document.createElement("td");if(cls)td.className=cls;
+        if(typeof txt==="string")td.textContent=txt;else td.appendChild(txt);return td;};
+      tr.appendChild(c(nameLink(r.name,r.id)));
+      const ab=document.createElement("span");ab.className="tmcell";
+      ab.appendChild(logoEl(r.team,null,"sm"));
+      ab.appendChild(document.createTextNode(r.team));
+      ab.title=fullTeam(r.team,r.teamName);
+      tr.appendChild(c(ab));
+      tr.appendChild(c(String(r.losses)));
+      tr.appendChild(c(r.done+" / "+r.owed));
+      tr.appendChild(c(String(Math.max(0,r.owed-r.done))));
+      tr.appendChild(c(r.defaults?String(r.defaults):"none",r.defaults?"def":"clean"));
+      body.appendChild(tr);
+    });
+    tab.appendChild(body);labelTable(tab);sbox.appendChild(tab);
+  }else{
+    sbox.innerHTML='<p class="hint">Nothing to tally yet. This fills up as weeks finish.</p>';
+  }
+
+  document.getElementById("nfl-note").textContent=
+    nflData.error?("Scoreboard problem: "+nflData.error+" Results may be stale."):"";
+
+}
+
+/* Past weeks. ESPN only serves the current one, so this reads the server's own
+   record of what happened and who paid up. */
+let histData={weeks:[]},histPick="";
+
+async function loadHistory(){
+  if(demo){
+    histData={weeks:[{week:"2026-1",at:Date.now()-6*864e5,losers:2,paidUp:1,rows:[
+      {name:"VAPOR32",id:0,team:"NE",result:"L",opponent:"SEA",score:"10-13",hits:4,paid:true},
+      {name:"Slimqnn",id:0,team:"TB",result:"L",opponent:"CIN",score:"27-33",hits:1,paid:false},
+      {name:"spaghettiBob",id:0,team:"SEA",result:"W",opponent:"NE",score:"13-10",hits:0,paid:null}
+    ]}],hitsRequired:4};
+    renderHistory();return;
+  }
+  try{ histData=await api("nfl/history"); renderHistory(); }
+  catch(e){ if(e.noServer){enterDemo();return;} console.error("History load failed:",e); }
+}
+
+function renderHistory(){
+  const sel=document.getElementById("hist-week");
+  const box=document.getElementById("nfl-history");
+  const weeks=histData.weeks||[];
+  if(!weeks.length){
+    sel.innerHTML="";box.innerHTML='<p class="hint">Nothing archived yet. Weeks land here once their games finish.</p>';
+    return;
+  }
+  if(sel.children.length!==weeks.length){
+    sel.innerHTML="";
+    weeks.forEach(w=>{
+      const o=document.createElement("option");o.value=w.week;
+      const label=w.at?new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(w.at)):"";
+      o.textContent="Week "+w.week.split("-")[1]+(label?"  ("+label+")":"");
+      sel.appendChild(o);
+    });
+  }
+  if(!histPick||!weeks.some(w=>w.week===histPick))histPick=weeks[0].week;
+  sel.value=histPick;
+
+  const w=weeks.find(x=>x.week===histPick);
+  box.innerHTML="";
+  const sum=document.createElement("div");sum.className="histsum";
+  sum.textContent=w.losers+" lost, "+w.paidUp+" paid up in full"+
+    (w.losers-w.paidUp?", "+(w.losers-w.paidUp)+" did not":"");
+  box.appendChild(sum);
+
+  const t=document.createElement("table");t.className="nfl-table";
+  t.innerHTML="<thead><tr><th>Member</th><th>Team</th><th>Fixture</th><th>Score</th><th>Result</th><th>Hits</th><th>Logged</th></tr></thead>";
+  const tb=document.createElement("tbody");
+  w.rows.forEach(r=>{
+    const tr=document.createElement("tr");
+    if(r.result==="L")tr.className="lost";
+    const c=(txt,cls)=>{const td=document.createElement("td");if(cls)td.className=cls;
+      if(typeof txt==="string")td.textContent=txt;else td.appendChild(txt);return td;};
+    tr.appendChild(c(nameLink(r.name,r.id)));
+    const ab=document.createElement("span");ab.className="tmcell";
+    ab.appendChild(logoEl(r.team,null,"sm"));
+    ab.appendChild(document.createTextNode(r.team));
+    ab.title=fullTeam(r.team,r.teamName);
+    tr.appendChild(c(ab));
+    const opp=document.createElement("span");opp.className="tmcell";
+    if(r.opponent){opp.appendChild(document.createTextNode("v "));
+      opp.appendChild(logoEl(r.opponent,null,"sm"));
+      opp.appendChild(document.createTextNode(r.opponent));}
+    else opp.textContent="-";
+    tr.appendChild(c(opp));
+    tr.appendChild(c(r.score||"","res"));
+    tr.appendChild(c(r.result==="L"?"lost":"won",r.result==="L"?"owe":"safe"));
+    tr.appendChild(c(r.result==="L"
+      ? r.hits+"/"+(histData.hitsRequired||4)+(r.paid?"  paid":"  short")
+      : "", r.result==="L"?(r.paid?"paid":"unpaid"):""));
+    const rec=document.createElement("span");
+    rec.style.color="var(--dim)";rec.style.fontSize="12px";
+    rec.textContent=r.recordedAt
+      ? new Intl.DateTimeFormat(undefined,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",
+          hour12:false,timeZone:"UTC"}).format(new Date(r.recordedAt))+(r.recordedBy?" by "+r.recordedBy:"")
+      : (r.result==="L"?"never logged":"");
+    tr.appendChild(c(rec));
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);labelTable(t);box.appendChild(t);
+}
+document.getElementById("hist-week").onchange=e=>{histPick=e.target.value;renderHistory();};
+
+document.getElementById("nfl-refresh").onclick=async()=>{
+  if(demo)return;
+  try{ if(isAdmin)await api("nfl/refresh",{}); await loadNfl(); }
+  catch(e){document.getElementById("nfl-note").textContent=e.message;}
+};
+
+/* ---------- tabs ---------- */
+const TABS=["t-me","t-fac","t-now","t-cal","t-ev","t-nfl","t-doc"];
+TABS.forEach(t=>{
+  document.getElementById(t).onclick=()=>{
+    if(!unlocked&&LOCKED_TABS.includes(t)){
+      document.getElementById("t-me").click();
+      const msg=document.getElementById("sendmsg");
+      note(msg,"Send your hours through with a Public API key and that tab will open up. There are instructions just below.",true);
+      document.getElementById("joinpass").focus();
+      return;
+    }
+    TABS.forEach(id=>{
+      const on=id===t;
+      document.getElementById(id).setAttribute("aria-selected",on);
+      document.getElementById(id.replace("t-","p-")).hidden=!on;
+    });
+    if(t==="t-fac"&&Date.now()-lastSync>15000)loadBoard(true);
+    if(t==="t-now")loadLive(true);
+    if(t==="t-ev")loadAnnual(true);
+    if(t==="t-cal")loadCalendar(true);
+    if(t==="t-doc")loadDocs(true);
+    if(t==="t-nfl")loadNfl(true);
+  };
+});
+
+/* ---------- boot ---------- */
+(function(){
+  try{
+    const s=JSON.parse(store.get("fh-me")||"null");
+    if(s){me={id:s.id||0,name:s.name||"",tz:s.tz||localTz,local:b64ToGrid(s.g)};
+      document.getElementById("mytz").value=me.tz;}
+  }catch(e){}
+  /* Each step is isolated: a failure in one must never stop the others from
+     running, which is exactly what went wrong the first time round. */
+  const step=(label,fn)=>{try{fn();}catch(err){console.error("boot step failed:",label,err);}};
+  step("entry mode",setEntryMode);
+  step("paint",paintMine);
+  step("code",renderCode);
+  step("thresholds",refreshMinP);
+  step("board",renderBoard);
+  step("lock",applyLock);
+  step("events",renderEvents);
+  step("roster",loadRoster);
+  /* Is there an API behind this page at all? A token is checked with the
+     server rather than trusted; no server at all drops us into demo mode. */
+  if(token){
+    api("session").then(d=>{signedIn(d);loadBoard();loadLive(true);loadCalendar(true);loadDocs(true);loadAnnual(true);loadNfl(true);})
+                  .catch(e=>{ if(e.noServer)enterDemo(); else signedOut(); });
+  }else{
+    signedOut();
+    api("roster").catch(e=>{ if(e.noServer)enterDemo(); });
+  }
+  setInterval(()=>{if(document.hidden||!unlocked||demo)return;loadBoard(true);loadLive(true);loadCalendar(true);},60000);
+})();
+</script>

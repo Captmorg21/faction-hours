@@ -1,0 +1,221 @@
+WANDERER'S REFUGE - FACTION HOURS
+Server cheat sheet
+=========================================================================
+
+THE BASICS
+-------------------------------------------------------------------------
+Server IP        194.164.29.81
+Site             https://0ne73c5.cserverhost.cloud   (that's a ZERO: 0ne)
+Login            ssh jack@194.164.29.81
+Your user        jack   (use sudo for anything system-level)
+
+Where things live:
+  /var/www/faction/index.html        the website
+  /var/www/faction/banner.png        faction banner
+  /opt/faction-hours/server.js       the API service
+  /etc/faction-hours.env             secrets (root only)
+  /var/lib/faction-hours/            all saved data
+  /etc/caddy/Caddyfile               web server config
+  /etc/systemd/system/faction-hours.service
+
+
+=========================================================================
+DEPLOYING CHANGES
+=========================================================================
+
+Run scp from WINDOWS (prompt reads C:\Users\Jack>), never from the server.
+If you see "Could not resolve hostname c" you're in the wrong terminal.
+
+Website only (no restart needed, just Ctrl+F5 in the browser):
+  scp C:\Users\Jack\Downloads\faction-hours.html jack@194.164.29.81:/var/www/faction/index.html
+
+Server code (two steps, because /opt needs root):
+  scp C:\Users\Jack\Downloads\server.js jack@194.164.29.81:/tmp/server.js
+then on the server:
+  sudo mv /tmp/server.js /opt/faction-hours/server.js
+  sudo systemctl restart faction-hours
+
+Check it came back up:
+  sudo journalctl -u faction-hours -n 15 --no-pager
+
+Want to see: "Faction Hours API listening", "roster refreshed", "NFL week N".
+
+
+=========================================================================
+THE SERVICE
+=========================================================================
+
+  sudo systemctl status faction-hours --no-pager     is it running
+  sudo systemctl restart faction-hours               restart it
+  sudo systemctl stop faction-hours                  stop it
+  sudo systemctl start faction-hours                 start it
+  sudo systemctl enable faction-hours                start on boot (already on)
+
+Logs:
+  sudo journalctl -u faction-hours -n 50 --no-pager  last 50 lines
+  sudo journalctl -u faction-hours -f                live, Ctrl+C to quit
+  sudo journalctl -u faction-hours --since "1 hour ago" --no-pager
+
+ALWAYS add --no-pager or it takes over the screen. If it does, press q.
+
+
+=========================================================================
+THE WEB SERVER (CADDY)
+=========================================================================
+
+  sudo systemctl reload caddy                        after editing the config
+  sudo systemctl status caddy --no-pager
+  sudo journalctl -u caddy -n 30 --no-pager          certificate problems show here
+  sudo nano /etc/caddy/Caddyfile                     edit the config
+
+
+=========================================================================
+SECRETS
+=========================================================================
+
+  sudo cat /etc/faction-hours.env                    view (root only)
+  sudo nano /etc/faction-hours.env                   edit, then restart service
+
+What's in it:
+  JOIN_PASS       faction passphrase for sending hours without a key
+  ADMIN_KEY       shared admin key, the break-glass way in
+  TORN_KEY        your Torn Public API key, used for roster and wars
+  ADMIN_IDS       player IDs that always get admin (comma separated)
+  NFL_ENFORCERS   who administers the pillow forfeit
+
+Generate a new random secret:
+  openssl rand -base64 24
+
+NOTE: 'source /etc/faction-hours.env' fails as jack - the file is root only.
+Use this shape instead:
+  sudo bash -c 'source /etc/faction-hours.env; curl -s "https://api.torn.com/faction/?selections=basic&key=$TORN_KEY"' | head -c 300
+
+
+=========================================================================
+THE DATA
+=========================================================================
+
+  ls -la /var/lib/faction-hours/                     everything saved
+
+  board.json      members' hours
+  history.json    who was online, sampled every 2 minutes
+  sessions.json   login tokens (hashes only)
+  calendar.json   manual calendar entries
+  docs.json       playbook pages
+  events.json     annual Torn events
+  rsvps.json      who said they're coming to what
+  nfl.json        NFL teams, results, hits, trout slaps
+
+Read one:
+  sudo cat /var/lib/faction-hours/nfl.json | python3 -m json.tool | head -40
+
+Back the lot up to your home folder:
+  sudo tar -czf ~/faction-backup-$(date +%F).tar.gz /var/lib/faction-hours /etc/faction-hours.env
+  sudo chown jack:jack ~/faction-backup-*.tar.gz
+
+Copy a backup down to Windows (run this ON WINDOWS):
+  scp jack@194.164.29.81:~/faction-backup-*.tar.gz C:\Users\Jack\Downloads\
+
+
+=========================================================================
+KEEPING IT PATCHED
+=========================================================================
+
+  sudo apt update && sudo apt upgrade -y             install updates
+  sudo reboot                                        if it asks for a restart
+
+After a reboot everything starts by itself. Just ssh back in.
+
+  uptime                                             how long it's been up
+  df -h /                                            disk space
+  free -h                                            memory
+
+
+=========================================================================
+CHECKING THE OUTSIDE WORLD
+=========================================================================
+
+Is the API answering locally?
+  curl localhost:3000/api/roster
+
+Through Caddy, with HTTPS?
+  curl https://0ne73c5.cserverhost.cloud/api/roster
+
+Torn API (needs sudo for the key):
+  sudo bash -c 'source /etc/faction-hours.env; curl -s "https://api.torn.com/faction/?selections=basic&key=$TORN_KEY"' | head -c 300
+
+NFL scoreboard (no key needed):
+  curl -s "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard" | head -c 300
+
+
+=========================================================================
+SECURITY
+=========================================================================
+
+  sudo ufw status                                    firewall rules
+  sudo ufw allow 443/tcp                             open a port
+  sudo lastlog                                       last login per user
+  sudo journalctl -u ssh --since today --no-pager    ssh attempts
+
+Ports open: 22 (ssh), 80 (http), 443 (https). Password login is off;
+only your key works. Root can't log in remotely.
+
+
+=========================================================================
+WHEN SOMETHING'S BROKEN
+=========================================================================
+
+Site won't load at all
+  sudo systemctl status caddy --no-pager
+  sudo journalctl -u caddy -n 30 --no-pager
+
+Site loads but tabs are empty / "can't reach the server"
+  sudo systemctl status faction-hours --no-pager
+  curl localhost:3000/api/roster
+  If that works but the site doesn't, it's the Caddyfile proxy section.
+
+Service won't start
+  sudo journalctl -u faction-hours -n 30 --no-pager
+  Usually a missing value in /etc/faction-hours.env - it refuses to start
+  without JOIN_PASS, ADMIN_KEY and TORN_KEY.
+
+Admin rights not working
+  sudo journalctl -u faction-hours -n 20 --no-pager | grep -i admin
+  Look for "Always-admin player IDs:". Missing means ADMIN_IDS isn't set.
+  Sign out on the site and back in after changing it.
+
+Changes not showing
+  Ctrl+F5 to hard refresh. Then check the file actually landed:
+  ls -la /var/www/faction/    and    ls -la /opt/faction-hours/
+  A timestamp older than your upload means the scp went elsewhere.
+
+
+=========================================================================
+NANO, SINCE IT CATCHES EVERYONE
+=========================================================================
+
+nano only has the file open once the screen CHANGES and you see
+"GNU nano" at the top. If you can still see jack@ubuntu:~$ then it
+isn't open and whatever you type is going to the shell instead.
+
+  Ctrl+O then Enter     save
+  Ctrl+X                exit
+  Ctrl+K                cut the current line (press repeatedly to clear)
+  Ctrl+W                search
+
+Avoid ! in passwords typed at the shell prompt - bash treats it specially.
+
+
+=========================================================================
+GETTING AROUND
+=========================================================================
+
+  ls -la                   list files here, with details
+  cd /var/www/faction      change folder
+  pwd                      where am I
+  cat file.txt             print a file
+  less file.txt            page through a file (q to quit)
+  head -c 300 file         first 300 characters
+  grep -c "word" file      count matches
+  df -h                    disk space
+  exit                     log out
